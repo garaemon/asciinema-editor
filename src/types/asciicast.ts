@@ -1,6 +1,10 @@
 // Asciicast v2 format type definitions
 // See: https://docs.asciinema.org/manual/asciicast/v2/
 
+// "o": terminal output (stdout)
+// "i": keyboard input (stdin)
+// "m": marker (breakpoint/navigation label)
+// "r": terminal resize (e.g. "120x40")
 export type EventType = "o" | "i" | "m" | "r";
 
 export interface AsciicastHeader {

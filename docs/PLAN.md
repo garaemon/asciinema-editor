@@ -253,3 +253,82 @@ src/
 19. Keyboard shortcuts
 20. Auto-save
 21. Performance optimization for large recordings
+
+---
+
+## 8. MVP Implementation PRs
+
+Each PR targets ~100 lines of diff for reviewability.
+TDD approach: write tests first, then implementation.
+
+### PR 1: Project Setup (DONE)
+- Vite + React 19 + TypeScript project initialization
+- ESLint configuration
+- Minimal App component
+
+### PR 2: Types + Vitest Setup
+- `src/types/asciicast.ts` - AsciicastHeader, AsciicastEvent, EventType, AsciicastData
+- Vitest configuration (`vitest` config in `vite.config.ts`)
+- Dev dependencies: `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`
+
+### PR 3: Parser (TDD)
+- `src/lib/__tests__/parser.test.ts` - Tests first
+- `src/lib/parser.ts` - Asciicast v2 parser implementation
+- Valid v2 parsing, header validation, malformed JSON, edge cases
+
+### PR 4: Serializer (TDD)
+- `src/lib/__tests__/serializer.test.ts` - Tests first
+- `src/lib/serializer.ts` - AsciicastData to NDJSON string
+- Round-trip test (parse -> serialize -> parse)
+
+### PR 5: Speed Operations (TDD)
+- `src/lib/__tests__/speed.test.ts` - Tests first
+- `src/lib/speed.ts` - Global speed multiplier, idle time compression
+
+### PR 6: Trimmer (TDD)
+- `src/lib/__tests__/trimmer.test.ts` - Tests first
+- `src/lib/trimmer.ts` - Start/end trim with time offset adjustment
+
+### PR 7: Masker (TDD)
+- `src/lib/__tests__/masker.test.ts` - Tests first
+- `src/lib/masker.ts` - String/regex masking on output events
+
+### PR 8: Undo/Redo Hook (TDD)
+- `src/hooks/__tests__/useHistory.test.ts` - Tests first
+- `src/hooks/useHistory.ts` - push/undo/redo with canUndo/canRedo flags
+
+### PR 9: File Upload Component
+- `src/components/FileUpload/FileUpload.tsx` - Drag & drop + file picker
+- `src/components/FileUpload/__tests__/FileUpload.test.tsx`
+
+### PR 10: Player Integration
+- `src/components/Player/Player.tsx` - asciinema-player React wrapper
+- `src/components/Player/PlaybackControls.tsx` - Play/pause/stop/speed
+- `src/hooks/usePlayback.ts` - Playback state management
+
+### PR 11: useAsciicast Hook + App Shell
+- `src/hooks/useAsciicast.ts` - Asciicast data management (integrates editing ops)
+- `src/App.tsx` - Main layout connecting upload -> player -> editor
+
+### PR 12: Editor Panel
+- `src/components/Editor/EventList.tsx` - Event list display and text editing
+- `src/components/Editor/EditorPanel.tsx` - Editor panel integration
+
+### PR 13: Speed & Trim Controls
+- `src/components/Editor/SpeedControls.tsx` - Speed slider + idle compression
+- `src/components/Editor/TrimControls.tsx` - Start/end trim UI
+
+### PR 14: Annotations
+- `src/components/Annotation/AnnotationPanel.tsx` - Annotation CRUD
+
+### PR 15: Font Settings
+- `src/components/FontSettings/FontSettings.tsx` - Font family/size/line-height/letter-spacing/ligature
+
+### PR 16: Export
+- `src/components/Export/ExportPanel.tsx` - Export settings and progress UI
+- `src/hooks/useExport.ts` - GIF/MP4/cast export logic
+
+### PR 17: E2E Tests
+- `e2e/file-upload.spec.ts`, `e2e/playback.spec.ts`
+- `e2e/editing.spec.ts`, `e2e/export.spec.ts`
+- Playwright configuration

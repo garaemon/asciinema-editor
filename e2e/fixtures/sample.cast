@@ -1,0 +1,5 @@
+{"version": 2, "width": 80, "height": 24, "timestamp": 1504467315}
+[0.5, "o", "$ "]
+[1.0, "o", "echo hello\r\n"]
+[1.5, "o", "hello\r\n"]
+[2.0, "o", "$ "]

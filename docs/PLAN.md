@@ -259,76 +259,108 @@ src/
 ## 8. MVP Implementation PRs
 
 Each PR targets ~100 lines of diff for reviewability.
-TDD approach: write tests first, then implementation.
+Library code uses TDD (tests first). UI code uses top-down approach (skeleton first, then wire up).
+
+### Phase A: Library Foundation (Bottom-Up, TDD) - DONE
 
 ### PR 1: Project Setup (DONE)
 - Vite + React 19 + TypeScript project initialization
 - ESLint configuration
 - Minimal App component
 
-### PR 2: Types + Vitest Setup
+### PR 2: Types + Vitest Setup (DONE)
 - `src/types/asciicast.ts` - AsciicastHeader, AsciicastEvent, EventType, AsciicastData
 - Vitest configuration (`vitest` config in `vite.config.ts`)
 - Dev dependencies: `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`
 
-### PR 3: Parser (TDD)
+### PR 3: Parser (TDD) (DONE)
 - `src/lib/__tests__/parser.test.ts` - Tests first
 - `src/lib/parser.ts` - Asciicast v2 parser implementation
 - Valid v2 parsing, header validation, malformed JSON, edge cases
 
-### PR 4: Serializer (TDD)
+### PR 4: Speed Operations (TDD) (DONE)
+- `src/lib/__tests__/speed.test.ts` - Tests first
+- `src/lib/speed.ts` - Global speed multiplier, idle time compression
+
+### PR 5: Trimmer (TDD) (DONE)
+- `src/lib/__tests__/trimmer.test.ts` - Tests first
+- `src/lib/trimmer.ts` - Start/end trim with time offset adjustment
+
+### Phase B: UI Shell (Top-Down, Skeleton First)
+
+### PR 7: App Shell + Layout Skeleton
+- `src/App.tsx` - Main layout with all panels as placeholders
+- Three-state UI: upload screen -> editing screen -> export screen
+- CSS layout: sidebar (controls) + main area (player)
+- All panels render placeholder text (e.g., "Player will appear here")
+
+### PR 8: File Upload + Parser Wiring
+- `src/components/FileUpload.tsx` - Drag & drop + file picker
+- Wire to existing `parseAsciicast()` to load .cast files
+- On successful parse, transition from upload screen to editing screen
+- Show error message on parse failure
+
+### PR 9: Player Integration
+- `src/components/Player.tsx` - asciinema-player React wrapper
+- Replace player placeholder with real asciinema-player
+- Display loaded recording with play/pause controls
+- Dev dependency: `asciinema-player`
+
+### Phase C: Wire Up Editing Controls
+
+### PR 10: Serializer (TDD)
 - `src/lib/__tests__/serializer.test.ts` - Tests first
 - `src/lib/serializer.ts` - AsciicastData to NDJSON string
 - Round-trip test (parse -> serialize -> parse)
 
-### PR 5: Speed Operations (TDD)
-- `src/lib/__tests__/speed.test.ts` - Tests first
-- `src/lib/speed.ts` - Global speed multiplier, idle time compression
+### PR 11: Speed Controls UI
+- `src/components/SpeedControls.tsx` - Speed slider + idle compression UI
+- Wire to existing `applySpeedMultiplier()` and `compressIdleTime()`
+- Player updates to reflect speed changes
 
-### PR 6: Trimmer (TDD)
-- `src/lib/__tests__/trimmer.test.ts` - Tests first
-- `src/lib/trimmer.ts` - Start/end trim with time offset adjustment
+### PR 12: Trim Controls UI
+- `src/components/TrimControls.tsx` - Start/end time inputs
+- Wire to existing `trimStart()` and `trimEnd()`
+- Player updates to reflect trimmed data
 
-### PR 7: Masker (TDD)
+### PR 13: Export (.cast Download)
+- `src/components/ExportPanel.tsx` - Export button + format selection
+- Wire serializer to generate .cast file and trigger browser download
+- Minimal viable export: .cast only (GIF/MP4 deferred)
+
+### Phase D: Additional Editing Features
+
+### PR 14: Undo/Redo
+- `src/hooks/useHistory.ts` - push/undo/redo with canUndo/canRedo flags
+- `src/hooks/__tests__/useHistory.test.ts` - TDD tests
+- Undo/Redo buttons in toolbar
+
+### PR 15: Masker (TDD)
 - `src/lib/__tests__/masker.test.ts` - Tests first
 - `src/lib/masker.ts` - String/regex masking on output events
+- `src/components/MaskControls.tsx` - Mask input UI
 
-### PR 8: Undo/Redo Hook (TDD)
-- `src/hooks/__tests__/useHistory.test.ts` - Tests first
-- `src/hooks/useHistory.ts` - push/undo/redo with canUndo/canRedo flags
+### PR 16: Event List / Text Editing
+- `src/components/EventList.tsx` - Scrollable event list
+- Direct text editing on output events (typo fixes)
 
-### PR 9: File Upload Component
-- `src/components/FileUpload/FileUpload.tsx` - Drag & drop + file picker
-- `src/components/FileUpload/__tests__/FileUpload.test.tsx`
+### Phase E: Polish & Extended Export
 
-### PR 10: Player Integration
-- `src/components/Player/Player.tsx` - asciinema-player React wrapper
-- `src/components/Player/PlaybackControls.tsx` - Play/pause/stop/speed
-- `src/hooks/usePlayback.ts` - Playback state management
+### PR 17: Font Settings
+- `src/components/FontSettings.tsx` - Font family/size/line-height/letter-spacing/ligature
+- Apply font settings to player rendering
 
-### PR 11: useAsciicast Hook + App Shell
-- `src/hooks/useAsciicast.ts` - Asciicast data management (integrates editing ops)
-- `src/App.tsx` - Main layout connecting upload -> player -> editor
+### PR 18: GIF Export
+- `src/hooks/useExport.ts` - GIF export logic
+- Dependencies: `gifenc`, `html-to-image`
+- Progress indicator during export
 
-### PR 12: Editor Panel
-- `src/components/Editor/EventList.tsx` - Event list display and text editing
-- `src/components/Editor/EditorPanel.tsx` - Editor panel integration
+### PR 19: MP4 Export
+- Dependencies: `ffmpeg.wasm`
+- COOP/COEP headers configuration for SharedArrayBuffer
+- Progress indicator during export
 
-### PR 13: Speed & Trim Controls
-- `src/components/Editor/SpeedControls.tsx` - Speed slider + idle compression
-- `src/components/Editor/TrimControls.tsx` - Start/end trim UI
-
-### PR 14: Annotations
-- `src/components/Annotation/AnnotationPanel.tsx` - Annotation CRUD
-
-### PR 15: Font Settings
-- `src/components/FontSettings/FontSettings.tsx` - Font family/size/line-height/letter-spacing/ligature
-
-### PR 16: Export
-- `src/components/Export/ExportPanel.tsx` - Export settings and progress UI
-- `src/hooks/useExport.ts` - GIF/MP4/cast export logic
-
-### PR 17: E2E Tests
-- `e2e/file-upload.spec.ts`, `e2e/playback.spec.ts`
-- `e2e/editing.spec.ts`, `e2e/export.spec.ts`
+### PR 20: E2E Tests
+- `e2e/` - Playwright tests for full user flows
+- File upload, editing, export scenarios
 - Playwright configuration

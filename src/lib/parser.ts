@@ -5,7 +5,8 @@ import type {
   EventType,
 } from '../types/asciicast';
 
-const VALID_EVENT_TYPES: ReadonlySet<string> = new Set(['o', 'i', 'm', 'r']);
+// "x" is a v3 event type but also appears in some v2 recordings
+const VALID_EVENT_TYPES: ReadonlySet<string> = new Set(['o', 'i', 'm', 'r', 'x']);
 
 function validateHeader(header: Record<string, unknown>): AsciicastHeader {
   if (header.version !== 2) {

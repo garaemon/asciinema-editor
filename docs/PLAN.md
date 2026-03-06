@@ -364,3 +364,11 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - `e2e/` - Playwright tests for full user flows
 - File upload, editing, export scenarios
 - Playwright configuration
+
+### Phase F: Format Support
+
+### PR 21: Asciicast v3 Support
+- Update parser to handle v3 format (relative timestamps, comment lines with `#`, tags)
+- Auto-detect v2 vs v3 from header
+- Convert v3 relative times to absolute times internally for unified editing
+- Update serializer to export as v3 when source was v3

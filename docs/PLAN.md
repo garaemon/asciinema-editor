@@ -286,32 +286,32 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - `src/lib/__tests__/trimmer.test.ts` - Tests first
 - `src/lib/trimmer.ts` - Start/end trim with time offset adjustment
 
-### Phase B: UI Shell (Top-Down, Skeleton First)
-
-### PR 7: App Shell + Layout Skeleton
+### PR 7: App Shell + Layout Skeleton (DONE)
 - `src/App.tsx` - Main layout with all panels as placeholders
 - Three-state UI: upload screen -> editing screen -> export screen
 - CSS layout: sidebar (controls) + main area (player)
 - All panels render placeholder text (e.g., "Player will appear here")
 
-### PR 8: File Upload + Parser Wiring
+### PR 8: File Upload + Player + E2E (DONE)
 - `src/components/FileUpload.tsx` - Drag & drop + file picker
-- Wire to existing `parseAsciicast()` to load .cast files
-- On successful parse, transition from upload screen to editing screen
-- Show error message on parse failure
-
-### PR 9: Player Integration
 - `src/components/Player.tsx` - asciinema-player React wrapper
-- Replace player placeholder with real asciinema-player
-- Display loaded recording with play/pause controls
-- Dev dependency: `asciinema-player`
+- Wire to existing `parseAsciicast()`, transition to editing screen
+- Playwright E2E tests for upload flow and screen navigation
+- Dev dependency: `asciinema-player`, `@playwright/test`
 
-### Phase C: Wire Up Editing Controls
+### PR 9: Asciicast v3 Format Support (DONE)
+- v3 header parsing (`term.cols`/`term.rows` -> `width`/`height`)
+- Relative timestamp -> absolute conversion
+- `#` comment line support, `"x"` exit event type
+- v3-specific fields: `tags`, `term.type`, `term.version`
+
+### Phase B: Wire Up Editing Controls
 
 ### PR 10: Serializer (TDD)
 - `src/lib/__tests__/serializer.test.ts` - Tests first
 - `src/lib/serializer.ts` - AsciicastData to NDJSON string
 - Round-trip test (parse -> serialize -> parse)
+- Support both v2 and v3 output formats
 
 ### PR 11: Speed Controls UI
 - `src/components/SpeedControls.tsx` - Speed slider + idle compression UI
@@ -328,7 +328,7 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - Wire serializer to generate .cast file and trigger browser download
 - Minimal viable export: .cast only (GIF/MP4 deferred)
 
-### Phase D: Additional Editing Features
+### Phase C: Additional Editing Features
 
 ### PR 14: Undo/Redo
 - `src/hooks/useHistory.ts` - push/undo/redo with canUndo/canRedo flags
@@ -344,7 +344,7 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - `src/components/EventList.tsx` - Scrollable event list
 - Direct text editing on output events (typo fixes)
 
-### Phase E: Polish & Extended Export
+### Phase D: Polish & Extended Export
 
 ### PR 17: Font Settings
 - `src/components/FontSettings.tsx` - Font family/size/line-height/letter-spacing/ligature

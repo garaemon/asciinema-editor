@@ -8,6 +8,7 @@ const VALID_CAST = [
   '[2.0, "i", "ls\\r\\n"]',
   '[3.0, "m", "marker"]',
   '[4.0, "r", "120x40"]',
+  '[5.0, "x", "0"]',
 ].join('\n');
 
 describe('parseAsciicast', () => {
@@ -24,12 +25,13 @@ describe('parseAsciicast', () => {
 
     it('should parse all event types', () => {
       const result = parseAsciicast(VALID_CAST);
-      expect(result.events).toHaveLength(5);
+      expect(result.events).toHaveLength(6);
       expect(result.events[0][1]).toBe('o');
       expect(result.events[1][1]).toBe('o');
       expect(result.events[2][1]).toBe('i');
       expect(result.events[3][1]).toBe('m');
       expect(result.events[4][1]).toBe('r');
+      expect(result.events[5][1]).toBe('x');
     });
 
     it('should parse header with optional fields', () => {
@@ -130,7 +132,7 @@ describe('parseAsciicast', () => {
     it('should throw on event with invalid event type', () => {
       const input = [
         '{"version": 2, "width": 80, "height": 24}',
-        '[0.5, "x", "data"]',
+        '[0.5, "z", "data"]',
       ].join('\n');
       expect(() => parseAsciicast(input)).toThrow();
     });

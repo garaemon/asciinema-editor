@@ -5,7 +5,8 @@
 // "i": keyboard input (stdin)
 // "m": marker (breakpoint/navigation label)
 // "r": terminal resize (e.g. "120x40")
-export type EventType = "o" | "i" | "m" | "r";
+// "x": exit (process exit code, v3 origin but also found in some v2 files)
+export type EventType = "o" | "i" | "m" | "r" | "x";
 
 export interface AsciicastHeader {
   version: 2;

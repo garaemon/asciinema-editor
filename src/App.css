@@ -91,6 +91,27 @@ body {
   padding: 48px 64px;
   text-align: center;
   color: #888;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.upload-zone:hover {
+  border-color: #666;
+}
+
+.upload-zone.drag-over {
+  border-color: #88f;
+  background: rgba(136, 136, 255, 0.05);
+}
+
+.upload-zone input[type="file"] {
+  display: none;
+}
+
+.upload-error {
+  color: #f66;
+  margin-top: 12px;
+  font-size: 14px;
 }
 
 /* Editing screen */

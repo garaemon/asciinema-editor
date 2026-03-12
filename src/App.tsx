@@ -1,22 +1,19 @@
 import { useState } from 'react'
+import { FileUpload } from './components/FileUpload'
+import { Player } from './components/Player'
+import type { AsciicastData } from './types/asciicast'
 import './App.css'
 
 type AppScreen = 'upload' | 'editing' | 'export'
 
-function UploadScreen({ onLoadFile }: { onLoadFile: () => void }) {
-  return (
-    <div className="upload-screen">
-      <div className="upload-zone">
-        <p>Drop .cast file here or click to upload</p>
-        <button onClick={onLoadFile}>
-          Load sample (demo)
-        </button>
-      </div>
-    </div>
-  )
+interface EditingScreenProps {
+  // Parsed asciicast data containing the header and event list from the .cast file
+  data: AsciicastData
+  // Raw text content of the uploaded .cast file, passed to the Player for playback
+  castContent: string
 }
 
-function EditingScreen() {
+function EditingScreen({ data, castContent }: EditingScreenProps) {
   return (
     <div className="editing-screen">
       <aside className="sidebar">
@@ -43,7 +40,11 @@ function EditingScreen() {
       </aside>
       <div className="main-content">
         <div className="player-area">
-          <p className="placeholder">Player will appear here</p>
+          <Player
+            castContent={castContent}
+            width={data.header.width}
+            height={data.header.height}
+          />
         </div>
         <div className="timeline-area">
           <p className="placeholder">Timeline will appear here</p>
@@ -66,6 +67,14 @@ function ExportScreen() {
 
 function App() {
   const [screen, setScreen] = useState<AppScreen>('upload')
+  const [asciicastData, setAsciicastData] = useState<AsciicastData | null>(null)
+  const [castContent, setCastContent] = useState('')
+
+  const handleFileLoaded = (data: AsciicastData, rawContent: string) => {
+    setAsciicastData(data)
+    setCastContent(rawContent)
+    setScreen('editing')
+  }
 
   return (
     <div className="app">
@@ -90,9 +99,13 @@ function App() {
       </header>
       <main className="app-main">
         {screen === 'upload' && (
-          <UploadScreen onLoadFile={() => setScreen('editing')} />
+          <div className="upload-screen">
+            <FileUpload onFileLoaded={handleFileLoaded} />
+          </div>
         )}
-        {screen === 'editing' && <EditingScreen />}
+        {screen === 'editing' && asciicastData && (
+          <EditingScreen data={asciicastData} castContent={castContent} />
+        )}
         {screen === 'export' && <ExportScreen />}
       </main>
     </div>

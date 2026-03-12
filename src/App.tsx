@@ -7,7 +7,9 @@ import './App.css'
 type AppScreen = 'upload' | 'editing' | 'export'
 
 interface EditingScreenProps {
+  // Parsed asciicast data containing the header and event list from the .cast file
   data: AsciicastData
+  // Raw text content of the uploaded .cast file, passed to the Player for playback
   castContent: string
 }
 

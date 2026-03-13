@@ -37,7 +37,9 @@ export function FileUpload({ onFileLoaded }: FileUploadProps) {
       e.preventDefault();
       setIsDragOver(false);
       const file = e.dataTransfer.files[0];
-      if (file) {handleFile(file);}
+      if (file) {
+        handleFile(file);
+      }
     },
     [handleFile]
   );
@@ -58,7 +60,9 @@ export function FileUpload({ onFileLoaded }: FileUploadProps) {
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (file) {handleFile(file);}
+      if (file) {
+        handleFile(file);
+      }
     },
     [handleFile]
   );

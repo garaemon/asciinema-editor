@@ -13,7 +13,7 @@ export function Player({ castContent, width, height }: PlayerProps) {
   const playerRef = useRef<AsciinemaPlayer.Player | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {return;}
 
     const blob = new Blob([castContent], { type: "text/plain" });
     const blobUrl = URL.createObjectURL(blob);

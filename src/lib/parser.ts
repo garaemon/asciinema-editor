@@ -66,8 +66,8 @@ function isStringRecord(value: unknown): value is Record<string, string> {
 
 function validateHeader(header: Record<string, unknown>): AsciicastHeader {
   const version = header.version;
-  if (version === 2) return validateV2Header(header);
-  if (version === 3) return validateV3Header(header);
+  if (version === 2) {return validateV2Header(header);}
+  if (version === 3) {return validateV3Header(header);}
   throw new Error(`Unsupported asciicast version: ${version}`);
 }
 

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { FileUpload } from './components/FileUpload'
 import { Player } from './components/Player'
+import { SpeedControls } from './components/SpeedControls'
+import { serializeAsciicast } from './lib/serializer'
 import type { AsciicastData } from './types/asciicast'
 import './App.css'
 
@@ -8,18 +10,20 @@ type AppScreen = 'upload' | 'editing' | 'export'
 
 interface EditingScreenProps {
   // Parsed asciicast data containing the header and event list from the .cast file
-  data: AsciicastData
+  data: AsciicastData;
   // Raw text content of the uploaded .cast file, passed to the Player for playback
-  castContent: string
+  castContent: string;
+  // Callback to update the asciicast data after editing operations
+  onDataChange: (data: AsciicastData) => void;
 }
 
-function EditingScreen({ data, castContent }: EditingScreenProps) {
+function EditingScreen({ data, castContent, onDataChange }: EditingScreenProps) {
   return (
     <div className="editing-screen">
       <aside className="sidebar">
         <div className="sidebar-panel">
           <h3>Speed</h3>
-          <p className="placeholder">Speed controls will appear here</p>
+          <SpeedControls data={data} onDataChange={onDataChange} />
         </div>
         <div className="sidebar-panel">
           <h3>Trim</h3>
@@ -76,6 +80,11 @@ function App() {
     setScreen('editing')
   }
 
+  const handleDataChange = (updatedData: AsciicastData) => {
+    setAsciicastData(updatedData)
+    setCastContent(serializeAsciicast(updatedData))
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -104,7 +113,11 @@ function App() {
           </div>
         )}
         {screen === 'editing' && asciicastData && (
-          <EditingScreen data={asciicastData} castContent={castContent} />
+          <EditingScreen
+            data={asciicastData}
+            castContent={castContent}
+            onDataChange={handleDataChange}
+          />
         )}
         {screen === 'export' && <ExportScreen />}
       </main>

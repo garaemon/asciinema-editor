@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { FileUpload } from './components/FileUpload'
 import { Player } from './components/Player'
 import { SpeedControls } from './components/SpeedControls'
+import { TrimControls } from './components/TrimControls'
+import { ExportPanel } from './components/ExportPanel'
 import { serializeAsciicast } from './lib/serializer'
 import type { AsciicastData } from './types/asciicast'
 import './App.css'
@@ -15,9 +17,11 @@ interface EditingScreenProps {
   castContent: string;
   // Callback to update the asciicast data after editing operations
   onDataChange: (data: AsciicastData) => void;
+  onReset: () => void;
+  hasChanges: boolean;
 }
 
-function EditingScreen({ data, castContent, onDataChange }: EditingScreenProps) {
+function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges }: EditingScreenProps) {
   return (
     <div className="editing-screen">
       <aside className="sidebar">
@@ -27,7 +31,7 @@ function EditingScreen({ data, castContent, onDataChange }: EditingScreenProps) 
         </div>
         <div className="sidebar-panel">
           <h3>Trim</h3>
-          <p className="placeholder">Trim controls will appear here</p>
+          <TrimControls data={data} onDataChange={onDataChange} onReset={onReset} hasChanges={hasChanges} />
         </div>
         <div className="sidebar-panel">
           <h3>Mask</h3>
@@ -58,24 +62,16 @@ function EditingScreen({ data, castContent, onDataChange }: EditingScreenProps) 
   )
 }
 
-function ExportScreen() {
-  return (
-    <div className="export-screen">
-      <div className="export-panel">
-        <h2>Export</h2>
-        <p className="placeholder">Export options will appear here</p>
-      </div>
-    </div>
-  )
-}
-
 function App() {
   const [screen, setScreen] = useState<AppScreen>('upload')
   const [asciicastData, setAsciicastData] = useState<AsciicastData | null>(null)
+  // Stores the original data at file load time so trim operations can be reverted
+  const [originalData, setOriginalData] = useState<AsciicastData | null>(null)
   const [castContent, setCastContent] = useState('')
 
   const handleFileLoaded = (data: AsciicastData, rawContent: string) => {
     setAsciicastData(data)
+    setOriginalData(data)
     setCastContent(rawContent)
     setScreen('editing')
   }
@@ -83,6 +79,13 @@ function App() {
   const handleDataChange = (updatedData: AsciicastData) => {
     setAsciicastData(updatedData)
     setCastContent(serializeAsciicast(updatedData))
+  }
+
+  const handleReset = () => {
+    if (originalData) {
+      setAsciicastData(originalData)
+      setCastContent(serializeAsciicast(originalData))
+    }
   }
 
   return (
@@ -117,9 +120,15 @@ function App() {
             data={asciicastData}
             castContent={castContent}
             onDataChange={handleDataChange}
+            onReset={handleReset}
+            hasChanges={asciicastData !== originalData}
           />
         )}
-        {screen === 'export' && <ExportScreen />}
+        {screen === 'export' && asciicastData && (
+          <div className="export-screen">
+            <ExportPanel data={asciicastData} />
+          </div>
+        )}
       </main>
     </div>
   )

@@ -163,6 +163,7 @@ Asciicast v2 uses NDJSON (Newline Delimited JSON) format:
 - Broken file repair
 - Window frame decoration (macOS-style title bar)
 - Export presets ("Blog", "Presentation", "High Quality")
+- Timeline-based trim: drag handles on the timeline to set trim range visually (replaces sidebar trim controls)
 
 ---
 

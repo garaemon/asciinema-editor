@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { FileUpload } from './components/FileUpload'
 import { Player } from './components/Player'
+import { ExportPanel } from './components/ExportPanel'
 import type { AsciicastData } from './types/asciicast'
 import './App.css'
 
@@ -54,17 +55,6 @@ function EditingScreen({ data, castContent }: EditingScreenProps) {
   )
 }
 
-function ExportScreen() {
-  return (
-    <div className="export-screen">
-      <div className="export-panel">
-        <h2>Export</h2>
-        <p className="placeholder">Export options will appear here</p>
-      </div>
-    </div>
-  )
-}
-
 function App() {
   const [screen, setScreen] = useState<AppScreen>('upload')
   const [asciicastData, setAsciicastData] = useState<AsciicastData | null>(null)
@@ -106,7 +96,11 @@ function App() {
         {screen === 'editing' && asciicastData && (
           <EditingScreen data={asciicastData} castContent={castContent} />
         )}
-        {screen === 'export' && <ExportScreen />}
+        {screen === 'export' && asciicastData && (
+          <div className="export-screen">
+            <ExportPanel data={asciicastData} />
+          </div>
+        )}
       </main>
     </div>
   )

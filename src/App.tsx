@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FileUpload } from './components/FileUpload'
 import { Player } from './components/Player'
 import { TrimControls } from './components/TrimControls'
+import { ExportPanel } from './components/ExportPanel'
 import { serializeAsciicast } from './lib/serializer'
 import type { AsciicastData } from './types/asciicast'
 import './App.css'
@@ -54,17 +55,6 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges }:
         <div className="timeline-area">
           <p className="placeholder">Timeline will appear here</p>
         </div>
-      </div>
-    </div>
-  )
-}
-
-function ExportScreen() {
-  return (
-    <div className="export-screen">
-      <div className="export-panel">
-        <h2>Export</h2>
-        <p className="placeholder">Export options will appear here</p>
       </div>
     </div>
   )
@@ -132,7 +122,11 @@ function App() {
             hasChanges={asciicastData !== originalData}
           />
         )}
-        {screen === 'export' && <ExportScreen />}
+        {screen === 'export' && asciicastData && (
+          <div className="export-screen">
+            <ExportPanel data={asciicastData} />
+          </div>
+        )}
       </main>
     </div>
   )

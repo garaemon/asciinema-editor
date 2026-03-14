@@ -55,8 +55,6 @@ function EditingScreen({ data, castContent }: EditingScreenProps) {
   )
 }
 
-// Placeholder removed — ExportPanel component now handles export UI
-
 function App() {
   const [screen, setScreen] = useState<AppScreen>('upload')
   const [asciicastData, setAsciicastData] = useState<AsciicastData | null>(null)

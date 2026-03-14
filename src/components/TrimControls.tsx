@@ -16,8 +16,8 @@ function computeMaxTime(data: AsciicastData): number {
 
 export function TrimControls({ data, onDataChange }: TrimControlsProps) {
   const [startTime, setStartTime] = useState(0);
-  const [endTime, setEndTime] = useState(0);
   const maxTime = computeMaxTime(data);
+  const [endTime, setEndTime] = useState(maxTime);
 
   const handleTrimStart = () => {
     if (startTime < 0) {

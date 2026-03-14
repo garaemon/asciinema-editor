@@ -5,6 +5,8 @@ import { trimStart, trimEnd } from '../lib/trimmer';
 interface TrimControlsProps {
   data: AsciicastData;
   onDataChange: (data: AsciicastData) => void;
+  onReset: () => void;
+  hasChanges: boolean;
 }
 
 function computeMaxTime(data: AsciicastData): number {
@@ -14,7 +16,7 @@ function computeMaxTime(data: AsciicastData): number {
   return data.events[data.events.length - 1][0];
 }
 
-export function TrimControls({ data, onDataChange }: TrimControlsProps) {
+export function TrimControls({ data, onDataChange, onReset, hasChanges }: TrimControlsProps) {
   const [startTime, setStartTime] = useState(0);
   const maxTime = computeMaxTime(data);
   const [endTime, setEndTime] = useState(maxTime);
@@ -29,13 +31,12 @@ export function TrimControls({ data, onDataChange }: TrimControlsProps) {
   };
 
   const handleTrimEnd = () => {
-    const effectiveEnd = endTime > 0 ? endTime : maxTime;
-    if (effectiveEnd < 0) {
+    if (endTime < 0) {
       return;
     }
-    const updated = trimEnd(data, effectiveEnd);
+    const updated = trimEnd(data, endTime);
     onDataChange(updated);
-    setEndTime(0);
+    setEndTime(computeMaxTime(updated));
   };
 
   return (
@@ -69,6 +70,11 @@ export function TrimControls({ data, onDataChange }: TrimControlsProps) {
           />
           <button onClick={handleTrimEnd}>Trim</button>
         </div>
+      </div>
+      <div className="control-group">
+        <button onClick={onReset} disabled={!hasChanges}>
+          Reset
+        </button>
       </div>
     </>
   );

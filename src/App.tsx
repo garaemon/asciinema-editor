@@ -14,9 +14,11 @@ interface EditingScreenProps {
   // Raw text content of the uploaded .cast file, passed to the Player for playback
   castContent: string;
   onDataChange: (data: AsciicastData) => void;
+  onReset: () => void;
+  hasChanges: boolean;
 }
 
-function EditingScreen({ data, castContent, onDataChange }: EditingScreenProps) {
+function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges }: EditingScreenProps) {
   return (
     <div className="editing-screen">
       <aside className="sidebar">
@@ -26,7 +28,7 @@ function EditingScreen({ data, castContent, onDataChange }: EditingScreenProps) 
         </div>
         <div className="sidebar-panel">
           <h3>Trim</h3>
-          <TrimControls data={data} onDataChange={onDataChange} />
+          <TrimControls data={data} onDataChange={onDataChange} onReset={onReset} hasChanges={hasChanges} />
         </div>
         <div className="sidebar-panel">
           <h3>Mask</h3>
@@ -71,10 +73,13 @@ function ExportScreen() {
 function App() {
   const [screen, setScreen] = useState<AppScreen>('upload')
   const [asciicastData, setAsciicastData] = useState<AsciicastData | null>(null)
+  // Stores the original data at file load time so trim operations can be reverted
+  const [originalData, setOriginalData] = useState<AsciicastData | null>(null)
   const [castContent, setCastContent] = useState('')
 
   const handleFileLoaded = (data: AsciicastData, rawContent: string) => {
     setAsciicastData(data)
+    setOriginalData(data)
     setCastContent(rawContent)
     setScreen('editing')
   }
@@ -82,6 +87,13 @@ function App() {
   const handleDataChange = (updatedData: AsciicastData) => {
     setAsciicastData(updatedData)
     setCastContent(serializeAsciicast(updatedData))
+  }
+
+  const handleReset = () => {
+    if (originalData) {
+      setAsciicastData(originalData)
+      setCastContent(serializeAsciicast(originalData))
+    }
   }
 
   return (
@@ -116,6 +128,8 @@ function App() {
             data={asciicastData}
             castContent={castContent}
             onDataChange={handleDataChange}
+            onReset={handleReset}
+            hasChanges={asciicastData !== originalData}
           />
         )}
         {screen === 'export' && <ExportScreen />}

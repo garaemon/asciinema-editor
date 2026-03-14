@@ -168,6 +168,26 @@ body {
   flex-shrink: 0;
 }
 
+/* Export options */
+.export-options {
+  margin-top: 16px;
+}
+
+.export-button {
+  padding: 10px 24px;
+  background: #2a5a2a;
+  border: 1px solid #4a8a4a;
+  border-radius: 6px;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.export-button:hover {
+  background: #3a6a3a;
+}
+
 /* Export screen */
 .export-screen {
   display: flex;

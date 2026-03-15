@@ -165,6 +165,12 @@ body {
   height: 100%;
 }
 
+/* Apply font CSS custom properties to asciinema-player internal elements */
+.player-container .asciinema-player .ap-terminal {
+  letter-spacing: var(--terminal-letter-spacing, normal);
+  font-variant-ligatures: var(--terminal-ligatures, normal);
+}
+
 .timeline-area {
   height: 56px;
   border-top: 1px solid #333;

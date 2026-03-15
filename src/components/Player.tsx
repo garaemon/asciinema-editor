@@ -27,13 +27,14 @@ export function Player({ castContent, width, height, fontConfig, onPlayerReady, 
       autoPlay: false,
       preload: true,
       controls: false,
-      fit: "both",
+      fit: fontConfig ? "width" : "both",
     };
     if (fontConfig?.fontFamily) {
       createOptions.terminalFontFamily = fontConfig.fontFamily;
     }
     if (fontConfig) {
       createOptions.terminalFontSize = `${fontConfig.fontSize}px`;
+      createOptions.terminalLineHeight = fontConfig.lineHeight;
     }
 
     const player = AsciinemaPlayer.create(
@@ -52,9 +53,8 @@ export function Player({ castContent, width, height, fontConfig, onPlayerReady, 
   }, [castContent, width, height, fontConfig, onPlayerReady, onPlayerDispose]);
 
   const containerStyle: React.CSSProperties = fontConfig ? {
-    "--terminal-line-height": String(fontConfig.lineHeight),
     "--terminal-letter-spacing": `${fontConfig.letterSpacing}px`,
-    fontVariantLigatures: fontConfig.ligatures ? "normal" : "none",
+    "--terminal-ligatures": fontConfig.ligatures ? "normal" : "none",
   } as React.CSSProperties : {};
 
   return <div ref={containerRef} data-testid="player-container" className="player-container" style={containerStyle} />;

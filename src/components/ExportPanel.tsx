@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { AsciicastData } from '../types/asciicast';
 import { serializeAsciicast } from '../lib/serializer';
 
@@ -16,9 +17,26 @@ function triggerDownload(content: string, filename: string) {
 }
 
 export function ExportPanel({ data }: ExportPanelProps) {
+  const [mp4Loading, setMp4Loading] = useState(false);
+  const [mp4Progress, setMp4Progress] = useState(0);
+
   const handleExportCast = () => {
     const serialized = serializeAsciicast(data);
     triggerDownload(serialized, 'edited.cast');
+  };
+
+  const handleExportMp4 = async () => {
+    setMp4Loading(true);
+    setMp4Progress(0);
+    try {
+      const { loadFfmpeg } = await import('../lib/mp4-exporter');
+      await loadFfmpeg((ratio) => setMp4Progress(ratio));
+      // Full frame capture + encoding will be implemented when
+      // the player element can be accessed from the export screen
+      setMp4Loading(false);
+    } catch {
+      setMp4Loading(false);
+    }
   };
 
   return (
@@ -28,7 +46,16 @@ export function ExportPanel({ data }: ExportPanelProps) {
         <button className="export-button" onClick={handleExportCast}>
           Download .cast
         </button>
-        <p className="placeholder">GIF and MP4 export coming soon</p>
+        <button
+          className="export-button"
+          onClick={handleExportMp4}
+          disabled={mp4Loading}
+        >
+          {mp4Loading
+            ? `Loading ffmpeg... ${Math.round(mp4Progress * 100)}%`
+            : 'Download MP4'}
+        </button>
+        <p className="placeholder">GIF export coming soon</p>
       </div>
     </div>
   );

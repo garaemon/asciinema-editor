@@ -149,6 +149,11 @@ Asciicast v2 uses NDJSON (Newline Delimited JSON) format:
 
 ### P2 - Future Extensions
 
+#### 4.15 Advanced Timeline
+- Timeline hover preview: show terminal state at the hovered position without seeking
+- Static frame preview: view any position's terminal state without playback
+
+#### 4.16 Other
 - Merge multiple recordings into one
 - Split one recording into multiple files
 - Arrow/pointer overlay annotations

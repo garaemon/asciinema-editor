@@ -365,3 +365,9 @@ body {
   gap: 6px;
   cursor: pointer;
 }
+
+.font-local-hint {
+  color: #a88;
+  font-size: 11px;
+  margin-top: 4px;
+}

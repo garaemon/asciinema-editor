@@ -170,6 +170,10 @@ Asciicast v2 uses NDJSON (Newline Delimited JSON) format:
 - Export presets ("Blog", "Presentation", "High Quality")
 - Timeline-based trim: drag handles on the timeline to set trim range visually (replaces sidebar trim controls)
 
+#### DevSecOps Enhancements
+- eslint-plugin-security: detect dangerouslySetInnerHTML, eval, etc.
+- license-checker: prevent incompatible license (GPL) dependencies
+
 ---
 
 ## 5. Application Architecture

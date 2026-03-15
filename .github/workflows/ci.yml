@@ -10,16 +10,26 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
+      - name: Verify GitHub Actions are SHA-pinned
+        run: |
+          UNPINNED=$(grep -rn '^\s*-\?\s*uses:' .github/workflows/*.yml | grep -v '@[a-f0-9]\{40\}' || true)
+          if [ -n "$UNPINNED" ]; then
+            echo "::error::Found GitHub Actions not pinned to SHA:"
+            echo "$UNPINNED"
+            exit 1
+          fi
       - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npx lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https
       - run: npm run lint
       - run: npm run build
       - run: npx vitest run --coverage
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@1f60566a86da84c4b4b64c17662a90de97fbb8d7 # v5.4.2
         with:
           files: coverage/lcov.info
           fail_ci_if_error: false

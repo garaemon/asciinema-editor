@@ -338,36 +338,52 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - Wire serializer to generate .cast file and trigger browser download
 - Minimal viable export: .cast only (GIF/MP4 deferred)
 
-### Phase C: Additional Editing Features
+### Phase C: Editing Features, Font & Export Foundation
 
-### PR 14: Undo/Redo
-- `src/hooks/useHistory.ts` - push/undo/redo with canUndo/canRedo flags
-- `src/hooks/__tests__/useHistory.test.ts` - TDD tests
-- Undo/Redo buttons in toolbar
+### PR 14: Undo/Redo (DONE)
+- `src/hooks/useHistory.ts` - Generic history hook with past/present/future stack
+- `src/hooks/__tests__/useHistory.test.ts` - 8 TDD tests
+- Undo/Redo buttons in header nav, wired to asciicast data changes
 
-### PR 15: Masker (TDD)
-- `src/lib/__tests__/masker.test.ts` - Tests first
-- `src/lib/masker.ts` - String/regex masking on output events
-- `src/components/MaskControls.tsx` - Mask input UI
+### PR 15: Masker (TDD) (DONE)
+- `src/lib/__tests__/masker.test.ts` - 15 TDD tests
+- `src/lib/masker.ts` - String/regex masking on output ("o") events
+
+### PR 17: Font Settings with Nerd Font Support (DONE)
+- `src/types/fontConfig.ts` - FontConfig interface and defaults
+- `src/components/FontSettings.tsx` - Font family (10 options incl. 4 Nerd Fonts), size, line-height, letter-spacing, ligature toggle
+- Player integration via `terminalFontFamily`/`terminalFontSize` options and CSS custom properties
+- Nerd Fonts: Hack, FiraCode, JetBrainsMono, CascadiaCode
+
+### PR 18: GIF Export Foundation (DONE)
+- `src/lib/gif-exporter.ts` - Frame capture (html-to-image) + GIF encoding (gifenc)
+- `src/types/gifenc.d.ts` - TypeScript declarations for gifenc
+- ExportPanel updated with GIF download button (single-frame MVP)
+- Dependencies: `gifenc`, `html-to-image`
+
+### PR 19: MP4 Export Foundation (DONE)
+- `src/lib/mp4-exporter.ts` - Lazy ffmpeg.wasm loading + MP4 encoding
+- ExportPanel updated with MP4 download button + loading progress
+- COOP/COEP headers in Vite dev server config
+- Dependencies: `@ffmpeg/ffmpeg`, `@ffmpeg/util`
+
+### Phase D: Polish & Extended Features
 
 ### PR 16: Event List / Text Editing
 - `src/components/EventList.tsx` - Scrollable event list
 - Direct text editing on output events (typo fixes)
 
-### Phase D: Polish & Extended Export
+### PR 15b: Mask Controls UI
+- `src/components/MaskControls.tsx` - Mask input UI wired to masker lib
 
-### PR 17: Font Settings
-- `src/components/FontSettings.tsx` - Font family/size/line-height/letter-spacing/ligature
-- Apply font settings to player rendering
-
-### PR 18: GIF Export
-- `src/hooks/useExport.ts` - GIF export logic
-- Dependencies: `gifenc`, `html-to-image`
+### PR 18b: Multi-Frame GIF Export
+- Full recording playback with frame capture at configurable FPS
+- `src/hooks/useExport.ts` - Export orchestration hook
 - Progress indicator during export
 
-### PR 19: MP4 Export
-- Dependencies: `ffmpeg.wasm`
-- COOP/COEP headers configuration for SharedArrayBuffer
+### PR 19b: Full MP4 Export
+- Player element wiring for frame capture
+- Full recording playback to MP4
 - Progress indicator during export
 
 ### PR 20: E2E Tests

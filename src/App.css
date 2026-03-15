@@ -304,6 +304,8 @@ body {
 /* Export preview */
 .export-preview {
   margin-bottom: 16px;
+  width: 640px;
+  height: 400px;
 }
 
 /* Export options */

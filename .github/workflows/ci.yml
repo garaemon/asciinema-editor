@@ -15,6 +15,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Verify GitHub Actions are SHA-pinned
+        run: |
+          UNPINNED=$(grep -rn '^\s*-\?\s*uses:' .github/workflows/*.yml | grep -v '@[a-f0-9]\{40\}' || true)
+          if [ -n "$UNPINNED" ]; then
+            echo "::error::Found GitHub Actions not pinned to SHA:"
+            echo "$UNPINNED"
+            exit 1
+          fi
       - run: npm ci
       - run: npm audit --audit-level=high
       - run: npx lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https

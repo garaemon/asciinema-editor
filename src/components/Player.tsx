@@ -6,8 +6,8 @@ interface PlayerProps {
   castContent: string;
   width?: number;
   height?: number;
-  onPlayerReady?: (player: AsciinemaPlayer.Player) => void;
-  onPlayerDispose?: () => void;
+  onPlayerReady: (player: AsciinemaPlayer.Player) => void;
+  onPlayerDispose: () => void;
 }
 
 export function Player({ castContent, width, height, onPlayerReady, onPlayerDispose }: PlayerProps) {
@@ -32,10 +32,10 @@ export function Player({ castContent, width, height, onPlayerReady, onPlayerDisp
       }
     );
     playerRef.current = player;
-    onPlayerReady?.(player);
+    onPlayerReady(player);
 
     return () => {
-      onPlayerDispose?.();
+      onPlayerDispose();
       playerRef.current?.dispose();
       playerRef.current = null;
     };

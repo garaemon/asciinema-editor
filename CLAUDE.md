@@ -6,6 +6,9 @@
 - Mark completed phases with `- DONE` suffix in the phase title.
 - When adding new features or PRs not originally in the plan, add them to the appropriate phase section.
 
+## Language
+- All files in this repository must be written in English (no Japanese in source code, comments, or documentation).
+
 ## Development Workflow
 - Run `npm run lint` and `npm test` before creating PRs.
 - Use TDD for library code (`src/lib/`): write tests first, then implementation.

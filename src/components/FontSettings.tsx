@@ -19,10 +19,6 @@ interface FontSettingsProps {
   onFontConfigChange: (config: FontConfig) => void;
 }
 
-function updateConfig(config: FontConfig, key: keyof FontConfig, value: string | number | boolean): FontConfig {
-  return { ...config, [key]: value };
-}
-
 export function FontSettings({ fontConfig, onFontConfigChange }: FontSettingsProps) {
   return (
     <div className="font-settings">
@@ -33,7 +29,7 @@ export function FontSettings({ fontConfig, onFontConfigChange }: FontSettingsPro
           value={fontConfig.fontFamily}
           onChange={(e) => {
             loadFont(e.target.value);
-            onFontConfigChange(updateConfig(fontConfig, "fontFamily", e.target.value));
+            onFontConfigChange({ fontFamily: e.target.value });
           }}
         >
           <optgroup label="Web Fonts">
@@ -50,48 +46,6 @@ export function FontSettings({ fontConfig, onFontConfigChange }: FontSettingsPro
         {requiresLocalInstall(fontConfig.fontFamily) && (
           <p className="font-local-hint">Requires local installation</p>
         )}
-      </div>
-      <div className="control-group">
-        <label>Size (px)</label>
-        <input
-          type="number"
-          min={8}
-          max={32}
-          value={fontConfig.fontSize}
-          onChange={(e) => onFontConfigChange(updateConfig(fontConfig, "fontSize", Number(e.target.value)))}
-        />
-      </div>
-      <div className="control-group">
-        <label>Line Height</label>
-        <input
-          type="number"
-          min={1.0}
-          max={2.0}
-          step={0.1}
-          value={fontConfig.lineHeight}
-          onChange={(e) => onFontConfigChange(updateConfig(fontConfig, "lineHeight", Number(e.target.value)))}
-        />
-      </div>
-      <div className="control-group">
-        <label>Letter Spacing (px)</label>
-        <input
-          type="number"
-          min={-2}
-          max={5}
-          step={0.5}
-          value={fontConfig.letterSpacing}
-          onChange={(e) => onFontConfigChange(updateConfig(fontConfig, "letterSpacing", Number(e.target.value)))}
-        />
-      </div>
-      <div className="control-group">
-        <label className="font-checkbox-label">
-          <input
-            type="checkbox"
-            checked={fontConfig.ligatures}
-            onChange={(e) => onFontConfigChange(updateConfig(fontConfig, "ligatures", e.target.checked))}
-          />
-          Ligatures
-        </label>
       </div>
     </div>
   );

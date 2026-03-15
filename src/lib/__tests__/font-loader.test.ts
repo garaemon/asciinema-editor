@@ -34,21 +34,21 @@ describe("loadFont", () => {
 
   it("adds a Google Fonts stylesheet link to document head", () => {
     loadFont("Fira Code");
+    const expectedUrl = "https://fonts.googleapis.com/css2?family=Fira+Code&display=swap";
     const links = document.head.querySelectorAll("link[rel=stylesheet]");
     const fontLink = Array.from(links).find((l) =>
-      l.getAttribute("href")?.includes("fonts.googleapis.com")
+      l.getAttribute("href") === expectedUrl
     );
     expect(fontLink).toBeTruthy();
-    expect(fontLink?.getAttribute("href")).toBe(
-      "https://fonts.googleapis.com/css2?family=Fira+Code&display=swap"
-    );
+    expect(fontLink?.getAttribute("href")).toBe(expectedUrl);
   });
 
   it("does not add duplicate links for the same font", () => {
     loadFont("JetBrains Mono");
     loadFont("JetBrains Mono");
+    const expectedUrl = "https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap";
     const links = Array.from(document.head.querySelectorAll("link[rel=stylesheet]")).filter((l) =>
-      l.getAttribute("href")?.includes("JetBrains")
+      l.getAttribute("href") === expectedUrl
     );
     expect(links).toHaveLength(1);
   });
@@ -69,10 +69,11 @@ describe("loadFont", () => {
 
   it("uses correct Google Fonts URL mapping", () => {
     loadFont("Cascadia Code");
-    const link = Array.from(document.head.querySelectorAll("link[rel=stylesheet]")).find((l) =>
-      l.getAttribute("href")?.includes("Cascadia")
-    );
     // Cascadia Code maps to Cascadia+Mono on Google Fonts
-    expect(link?.getAttribute("href")).toContain("Cascadia+Mono");
+    const expectedUrl = "https://fonts.googleapis.com/css2?family=Cascadia+Mono&display=swap";
+    const link = Array.from(document.head.querySelectorAll("link[rel=stylesheet]")).find((l) =>
+      l.getAttribute("href") === expectedUrl
+    );
+    expect(link).toBeTruthy();
   });
 });

@@ -28,4 +28,10 @@ jobs:
       - run: npx lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https
       - run: npm run lint
       - run: npm run build
-      - run: npm test
+      - run: npx vitest run --coverage
+      - uses: codecov/codecov-action@v5
+        with:
+          files: coverage/lcov.info
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: garaemon/asciinema-editor

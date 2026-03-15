@@ -24,43 +24,56 @@ const CAST_CONTENT = [
   '[0.5, "o", "hello"]',
 ].join("\n");
 
+const noopReady = vi.fn();
+const noopDispose = vi.fn();
+const DEFAULT_PROPS = {
+  castContent: CAST_CONTENT,
+  width: 80,
+  height: 24,
+  onPlayerReady: noopReady,
+  onPlayerDispose: noopDispose,
+};
+
 beforeEach(() => {
   mockCreate.mockClear();
   mockDispose.mockClear();
+  noopReady.mockClear();
+  noopDispose.mockClear();
 });
 
 describe("Player", () => {
   it("renders a container div", () => {
-    render(<Player castContent={CAST_CONTENT} />);
+    render(<Player {...DEFAULT_PROPS} />);
     expect(screen.getByTestId("player-container")).toBeInTheDocument();
   });
 
   it("calls AsciinemaPlayer.create with blob URL and options", () => {
-    render(<Player castContent={CAST_CONTENT} width={80} height={24} />);
+    render(<Player {...DEFAULT_PROPS} />);
 
     expect(mockCreate).toHaveBeenCalledTimes(1);
     const [src, container, opts] = mockCreate.mock.calls[0];
 
-    // src should be a blob URL
-    expect(src).toMatch(/^blob:/);
+    // src should be a data URL with percent-encoded content
+    expect(src).toMatch(/^data:text\/plain,/);
     expect(container).toBeInstanceOf(HTMLElement);
     expect(opts).toEqual({
       cols: 80,
       rows: 24,
       autoPlay: false,
-      controls: true,
+      preload: true,
+      controls: false,
       fit: "both",
     });
   });
 
   it("disposes player on unmount", () => {
-    render(<Player castContent={CAST_CONTENT} />);
+    render(<Player {...DEFAULT_PROPS} />);
     cleanup();
     expect(mockDispose).toHaveBeenCalledTimes(1);
   });
 
   it("recreates player when castContent changes", () => {
-    const { rerender } = render(<Player castContent={CAST_CONTENT} />);
+    const { rerender } = render(<Player {...DEFAULT_PROPS} />);
     expect(mockCreate).toHaveBeenCalledTimes(1);
 
     const newContent = [
@@ -68,16 +81,15 @@ describe("Player", () => {
       '[0.1, "o", "new"]',
     ].join("\n");
 
-    rerender(<Player castContent={newContent} />);
+    rerender(<Player {...DEFAULT_PROPS} castContent={newContent} />);
     // Previous player disposed, new one created
     expect(mockDispose).toHaveBeenCalledTimes(1);
     expect(mockCreate).toHaveBeenCalledTimes(2);
   });
 
-  it("passes undefined cols/rows when width/height not provided", () => {
-    render(<Player castContent={CAST_CONTENT} />);
-    const [, , opts] = mockCreate.mock.calls[0];
-    expect(opts.cols).toBeUndefined();
-    expect(opts.rows).toBeUndefined();
+  it("calls onPlayerReady with created player instance", () => {
+    render(<Player {...DEFAULT_PROPS} />);
+    expect(noopReady).toHaveBeenCalledTimes(1);
+    expect(noopReady).toHaveBeenCalledWith(mockCreate.mock.results[0].value);
   });
 });

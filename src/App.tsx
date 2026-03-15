@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { FileUpload } from './components/FileUpload'
 import { Player } from './components/Player'
+import { Timeline } from './components/Timeline'
 import { SpeedControls } from './components/SpeedControls'
 import { TrimControls } from './components/TrimControls'
 import { ExportPanel } from './components/ExportPanel'
 import { serializeAsciicast } from './lib/serializer'
 import type { AsciicastData } from './types/asciicast'
+import type { Player as AsciinemaPlayerType } from 'asciinema-player'
 import './App.css'
 
 type AppScreen = 'upload' | 'editing' | 'export'
@@ -21,7 +23,24 @@ interface EditingScreenProps {
   hasChanges: boolean;
 }
 
+function computeTotalDuration(data: AsciicastData): number {
+  if (data.events.length === 0) {
+    return 0;
+  }
+  return data.events[data.events.length - 1][0];
+}
+
 function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges }: EditingScreenProps) {
+  const [playerInstance, setPlayerInstance] = useState<AsciinemaPlayerType | null>(null);
+
+  const handlePlayerReady = useCallback((player: AsciinemaPlayerType) => {
+    setPlayerInstance(player);
+  }, []);
+
+  const handlePlayerDispose = useCallback(() => {
+    setPlayerInstance(null);
+  }, []);
+
   return (
     <div className="editing-screen">
       <aside className="sidebar">
@@ -52,10 +71,15 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges }:
             castContent={castContent}
             width={data.header.width}
             height={data.header.height}
+            onPlayerReady={handlePlayerReady}
+            onPlayerDispose={handlePlayerDispose}
           />
         </div>
         <div className="timeline-area">
-          <p className="placeholder">Timeline will appear here</p>
+          <Timeline
+            player={playerInstance}
+            totalDuration={computeTotalDuration(data)}
+          />
         </div>
       </div>
     </div>

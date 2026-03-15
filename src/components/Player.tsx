@@ -1,16 +1,18 @@
 import { useEffect, useRef } from "react";
 import * as AsciinemaPlayer from "asciinema-player";
 import "asciinema-player/dist/bundle/asciinema-player.css";
+import type { FontConfig } from "../types/fontConfig";
 
 interface PlayerProps {
   castContent: string;
   width: number;
   height: number;
+  fontConfig?: FontConfig;
   onPlayerReady: (player: AsciinemaPlayer.Player) => void;
   onPlayerDispose: () => void;
 }
 
-export function Player({ castContent, width, height, onPlayerReady, onPlayerDispose }: PlayerProps) {
+export function Player({ castContent, width, height, fontConfig, onPlayerReady, onPlayerDispose }: PlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<AsciinemaPlayer.Player | null>(null);
 
@@ -19,17 +21,25 @@ export function Player({ castContent, width, height, onPlayerReady, onPlayerDisp
       return;
     }
 
+    const createOptions: Record<string, unknown> = {
+      cols: width,
+      rows: height,
+      autoPlay: false,
+      preload: true,
+      controls: false,
+      fit: "both",
+    };
+    if (fontConfig?.fontFamily) {
+      createOptions.terminalFontFamily = fontConfig.fontFamily;
+    }
+    if (fontConfig) {
+      createOptions.terminalFontSize = `${fontConfig.fontSize}px`;
+    }
+
     const player = AsciinemaPlayer.create(
       "data:text/plain," + encodeURIComponent(castContent),
       containerRef.current,
-      {
-        cols: width,
-        rows: height,
-        autoPlay: false,
-        preload: true,
-        controls: false,
-        fit: "both",
-      }
+      createOptions
     );
     playerRef.current = player;
     onPlayerReady(player);
@@ -39,7 +49,13 @@ export function Player({ castContent, width, height, onPlayerReady, onPlayerDisp
       playerRef.current?.dispose();
       playerRef.current = null;
     };
-  }, [castContent, width, height, onPlayerReady, onPlayerDispose]);
+  }, [castContent, width, height, fontConfig, onPlayerReady, onPlayerDispose]);
 
-  return <div ref={containerRef} data-testid="player-container" className="player-container" />;
+  const containerStyle: React.CSSProperties = fontConfig ? {
+    "--terminal-line-height": String(fontConfig.lineHeight),
+    "--terminal-letter-spacing": `${fontConfig.letterSpacing}px`,
+    fontVariantLigatures: fontConfig.ligatures ? "normal" : "none",
+  } as React.CSSProperties : {};
+
+  return <div ref={containerRef} data-testid="player-container" className="player-container" style={containerStyle} />;
 }

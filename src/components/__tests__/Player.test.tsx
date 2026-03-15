@@ -41,8 +41,8 @@ describe("Player", () => {
     expect(mockCreate).toHaveBeenCalledTimes(1);
     const [src, container, opts] = mockCreate.mock.calls[0];
 
-    // src should be a data URL with base64-encoded content
-    expect(src).toMatch(/^data:text\/plain;base64,/);
+    // src should be a data URL with percent-encoded content
+    expect(src).toMatch(/^data:text\/plain,/);
     expect(container).toBeInstanceOf(HTMLElement);
     expect(opts).toEqual({
       cols: 80,

@@ -20,7 +20,7 @@ export function Player({ castContent, width, height, onPlayerReady, onPlayerDisp
     }
 
     const player = AsciinemaPlayer.create(
-      "data:text/plain;base64," + btoa(unescape(encodeURIComponent(castContent))),
+      "data:text/plain," + encodeURIComponent(castContent),
       containerRef.current,
       {
         cols: width,

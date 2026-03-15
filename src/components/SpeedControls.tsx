@@ -46,17 +46,18 @@ export function SpeedControls({ data, onDataChange }: SpeedControlsProps) {
         </div>
       </div>
       <div className="control-group">
-        <label htmlFor="idle-threshold">Idle compression</label>
+        <span className="control-group-title">Idle compression</span>
+        <label htmlFor="idle-threshold">Threshold (s)</label>
+        <input
+          id="idle-threshold"
+          type="number"
+          min="0.1"
+          step="0.1"
+          value={idleThreshold}
+          onChange={(e) => setIdleThreshold(parseFloat(e.target.value) || 2)}
+        />
+        <label htmlFor="compressed-duration">Compress to (s)</label>
         <div className="control-row">
-          <input
-            id="idle-threshold"
-            type="number"
-            min="0.1"
-            step="0.1"
-            value={idleThreshold}
-            onChange={(e) => setIdleThreshold(parseFloat(e.target.value) || 2)}
-            placeholder="Threshold (s)"
-          />
           <input
             id="compressed-duration"
             type="number"
@@ -64,7 +65,6 @@ export function SpeedControls({ data, onDataChange }: SpeedControlsProps) {
             step="0.1"
             value={compressedDuration}
             onChange={(e) => setCompressedDuration(parseFloat(e.target.value) || 0)}
-            placeholder="To (s)"
           />
           <button onClick={handleCompressIdle}>Compress</button>
         </div>

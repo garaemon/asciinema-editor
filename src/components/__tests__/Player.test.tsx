@@ -41,14 +41,15 @@ describe("Player", () => {
     expect(mockCreate).toHaveBeenCalledTimes(1);
     const [src, container, opts] = mockCreate.mock.calls[0];
 
-    // src should be a blob URL
-    expect(src).toMatch(/^blob:/);
+    // src should be a data URL with base64-encoded content
+    expect(src).toMatch(/^data:text\/plain;base64,/);
     expect(container).toBeInstanceOf(HTMLElement);
     expect(opts).toEqual({
       cols: 80,
       rows: 24,
       autoPlay: false,
-      controls: true,
+      preload: true,
+      controls: false,
       fit: "both",
     });
   });

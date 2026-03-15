@@ -315,25 +315,25 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - `#` comment line support, `"x"` exit event type
 - v3-specific fields: `tags`, `term.type`, `term.version`
 
-### Phase B: Wire Up Editing Controls
+### Phase B: Wire Up Editing Controls - DONE
 
-### PR 10: Serializer (TDD)
+### PR 10: Serializer (TDD) (DONE)
 - `src/lib/__tests__/serializer.test.ts` - Tests first
 - `src/lib/serializer.ts` - AsciicastData to NDJSON string
 - Round-trip test (parse -> serialize -> parse)
 - Support both v2 and v3 output formats
 
-### PR 11: Speed Controls UI
+### PR 11: Speed Controls UI (DONE)
 - `src/components/SpeedControls.tsx` - Speed slider + idle compression UI
 - Wire to existing `applySpeedMultiplier()` and `compressIdleTime()`
 - Player updates to reflect speed changes
 
-### PR 12: Trim Controls UI
+### PR 12: Trim Controls UI (DONE)
 - `src/components/TrimControls.tsx` - Start/end time inputs
 - Wire to existing `trimStart()` and `trimEnd()`
 - Player updates to reflect trimmed data
 
-### PR 13: Export (.cast Download)
+### PR 13: Export (.cast Download) (DONE)
 - `src/components/ExportPanel.tsx` - Export button + format selection
 - Wire serializer to generate .cast file and trigger browser download
 - Minimal viable export: .cast only (GIF/MP4 deferred)
@@ -374,6 +374,19 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - `e2e/` - Playwright tests for full user flows
 - File upload, editing, export scenarios
 - Playwright configuration
+
+### Phase E: Infrastructure (DONE)
+
+### ESLint Enhancement (DONE)
+- Enforce curly braces and indentation rules
+
+### Timeline Controls (DONE)
+- Play/pause, seekbar, and time display
+
+### Code Coverage with Codecov (DONE)
+
+### DevSecOps Pipeline (DONE)
+- Dependabot, Gitleaks, CodeQL, supply chain hardening
 
 ### Phase F: Format Support
 

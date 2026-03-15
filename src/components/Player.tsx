@@ -6,11 +6,9 @@ interface PlayerProps {
   castContent: string;
   width?: number;
   height?: number;
-  onPlayerReady?: (player: AsciinemaPlayer.Player) => void;
-  onPlayerDispose?: () => void;
 }
 
-export function Player({ castContent, width, height, onPlayerReady, onPlayerDispose }: PlayerProps) {
+export function Player({ castContent, width, height }: PlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<AsciinemaPlayer.Player | null>(null);
 
@@ -32,14 +30,12 @@ export function Player({ castContent, width, height, onPlayerReady, onPlayerDisp
       }
     );
     playerRef.current = player;
-    onPlayerReady?.(player);
 
     return () => {
-      onPlayerDispose?.();
       playerRef.current?.dispose();
       playerRef.current = null;
     };
-  }, [castContent, width, height, onPlayerReady, onPlayerDispose]);
+  }, [castContent, width, height]);
 
   return <div ref={containerRef} data-testid="player-container" className="player-container" />;
 }

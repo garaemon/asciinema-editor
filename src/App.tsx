@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { FileUpload } from './components/FileUpload'
 import { Player } from './components/Player'
+import { SpeedControls } from './components/SpeedControls'
 import { TrimControls } from './components/TrimControls'
 import { ExportPanel } from './components/ExportPanel'
 import { serializeAsciicast } from './lib/serializer'
@@ -14,6 +15,7 @@ interface EditingScreenProps {
   data: AsciicastData;
   // Raw text content of the uploaded .cast file, passed to the Player for playback
   castContent: string;
+  // Callback to update the asciicast data after editing operations
   onDataChange: (data: AsciicastData) => void;
   onReset: () => void;
   hasChanges: boolean;
@@ -25,7 +27,7 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges }:
       <aside className="sidebar">
         <div className="sidebar-panel">
           <h3>Speed</h3>
-          <p className="placeholder">Speed controls will appear here</p>
+          <SpeedControls data={data} onDataChange={onDataChange} />
         </div>
         <div className="sidebar-panel">
           <h3>Trim</h3>

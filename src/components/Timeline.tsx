@@ -20,10 +20,12 @@ export function Timeline({ player, totalDuration }: TimelineProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef(player);
 
+  // Keep playerRef in sync so pollTime always reads the latest instance
   useEffect(() => {
     playerRef.current = player;
   }, [player]);
 
+  // Poll the player's current time via requestAnimationFrame to update the seekbar
   useEffect(() => {
     if (!player) {
       return;
@@ -49,6 +51,7 @@ export function Timeline({ player, totalDuration }: TimelineProps) {
     };
   }, [player]);
 
+  // Track the player's play/pause/ended state to toggle the button icon
   useEffect(() => {
     if (!player) {
       return;

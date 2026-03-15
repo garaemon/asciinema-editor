@@ -7,7 +7,7 @@ interface PlayerProps {
   castContent: string;
   width: number;
   height: number;
-  fontConfig?: FontConfig;
+  fontConfig: FontConfig;
   onPlayerReady: (player: AsciinemaPlayer.Player) => void;
   onPlayerDispose: () => void;
 }
@@ -29,7 +29,7 @@ export function Player({ castContent, width, height, fontConfig, onPlayerReady, 
       controls: false,
       fit: "both",
     };
-    if (fontConfig?.fontFamily) {
+    if (fontConfig.fontFamily) {
       createOptions.terminalFontFamily = fontConfig.fontFamily;
     }
 

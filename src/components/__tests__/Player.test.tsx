@@ -30,6 +30,7 @@ const DEFAULT_PROPS = {
   castContent: CAST_CONTENT,
   width: 80,
   height: 24,
+  fontConfig: { fontFamily: "" },
   onPlayerReady: noopReady,
   onPlayerDispose: noopDispose,
 };

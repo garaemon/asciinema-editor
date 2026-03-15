@@ -4,8 +4,8 @@ import "asciinema-player/dist/bundle/asciinema-player.css";
 
 interface PlayerProps {
   castContent: string;
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
   onPlayerReady: (player: AsciinemaPlayer.Player) => void;
   onPlayerDispose: () => void;
 }

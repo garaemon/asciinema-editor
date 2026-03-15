@@ -28,6 +28,8 @@ const noopReady = vi.fn();
 const noopDispose = vi.fn();
 const DEFAULT_PROPS = {
   castContent: CAST_CONTENT,
+  width: 80,
+  height: 24,
   onPlayerReady: noopReady,
   onPlayerDispose: noopDispose,
 };
@@ -46,7 +48,7 @@ describe("Player", () => {
   });
 
   it("calls AsciinemaPlayer.create with blob URL and options", () => {
-    render(<Player {...DEFAULT_PROPS} width={80} height={24} />);
+    render(<Player {...DEFAULT_PROPS} />);
 
     expect(mockCreate).toHaveBeenCalledTimes(1);
     const [src, container, opts] = mockCreate.mock.calls[0];
@@ -85,10 +87,9 @@ describe("Player", () => {
     expect(mockCreate).toHaveBeenCalledTimes(2);
   });
 
-  it("passes undefined cols/rows when width/height not provided", () => {
+  it("calls onPlayerReady with created player instance", () => {
     render(<Player {...DEFAULT_PROPS} />);
-    const [, , opts] = mockCreate.mock.calls[0];
-    expect(opts.cols).toBeUndefined();
-    expect(opts.rows).toBeUndefined();
+    expect(noopReady).toHaveBeenCalledTimes(1);
+    expect(noopReady).toHaveBeenCalledWith(mockCreate.mock.results[0].value);
   });
 });

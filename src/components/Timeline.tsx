@@ -29,6 +29,8 @@ export function Timeline({ player, totalDuration }: TimelineProps) {
       return;
     }
 
+    // Sync the seekbar position with the player's current time every frame.
+    // Skips updates while the user is dragging the seekbar.
     function pollTime() {
       const currentPlayer = playerRef.current;
       if (!currentPlayer || isSeekingRef.current) {

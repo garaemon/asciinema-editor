@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { AsciicastData } from '../types/asciicast';
 import { serializeAsciicast } from '../lib/serializer';
-import { DEFAULT_GIF_OPTIONS } from '../lib/gif-exporter';
+import { Player } from './Player';
 import type { GifExportOptions } from '../lib/gif-exporter';
+
+const DEFAULT_GIF_OPTIONS: GifExportOptions = {
+  fps: 10,
+  quality: 10,
+};
 
 interface ExportPanelProps {
   data: AsciicastData;
-  playerElement?: HTMLElement | null;
+  castContent: string;
 }
 
 function triggerDownload(content: string, filename: string) {
@@ -29,9 +34,18 @@ function triggerBlobDownload(data: Uint8Array, filename: string, mimeType: strin
   URL.revokeObjectURL(url);
 }
 
-export function ExportPanel({ data, playerElement }: ExportPanelProps) {
+export function ExportPanel({ data, castContent }: ExportPanelProps) {
   const [gifOptions] = useState<GifExportOptions>(DEFAULT_GIF_OPTIONS);
   const [isExporting, setIsExporting] = useState(false);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+
+  const handlePlayerReady = () => {
+    // Player is ready for GIF capture
+  };
+
+  const handlePlayerDispose = () => {
+    // No-op
+  };
 
   const handleExportCast = () => {
     const serialized = serializeAsciicast(data);
@@ -39,12 +53,12 @@ export function ExportPanel({ data, playerElement }: ExportPanelProps) {
   };
 
   const handleExportGif = async () => {
+    const playerElement = playerContainerRef.current;
     if (!playerElement) {
       return;
     }
     setIsExporting(true);
     try {
-      // Single-frame GIF capture as MVP
       const { captureFrame, renderFrameToCanvas, encodeGif } = await import('../lib/gif-exporter');
       const image = await captureFrame(playerElement);
       const canvas = document.createElement('canvas');
@@ -61,6 +75,15 @@ export function ExportPanel({ data, playerElement }: ExportPanelProps) {
   return (
     <div className="export-panel">
       <h2>Export</h2>
+      <div className="export-preview" ref={playerContainerRef}>
+        <Player
+          castContent={castContent}
+          width={data.header.width}
+          height={data.header.height}
+          onPlayerReady={handlePlayerReady}
+          onPlayerDispose={handlePlayerDispose}
+        />
+      </div>
       <div className="export-options">
         <button className="export-button" onClick={handleExportCast}>
           Download .cast
@@ -68,9 +91,9 @@ export function ExportPanel({ data, playerElement }: ExportPanelProps) {
         <button
           className="export-button export-button-gif"
           onClick={handleExportGif}
-          disabled={isExporting || !playerElement}
+          disabled={isExporting}
         >
-          {isExporting ? 'Exporting...' : 'Download GIF (single frame)'}
+          {isExporting ? 'Exporting...' : 'Download GIF'}
         </button>
         <p className="placeholder">MP4 export coming soon</p>
       </div>

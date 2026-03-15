@@ -301,9 +301,18 @@ body {
   background: #3a3a5a;
 }
 
+/* Export preview */
+.export-preview {
+  margin-bottom: 16px;
+}
+
 /* Export options */
 .export-options {
   margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .export-button {
@@ -314,7 +323,6 @@ body {
   color: #e0e0e0;
   cursor: pointer;
   font-size: 15px;
-  margin-bottom: 12px;
 }
 
 .export-button:hover {

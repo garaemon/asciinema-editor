@@ -350,6 +350,11 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - `src/lib/masker.ts` - String/regex masking on output events
 - `src/components/MaskControls.tsx` - Mask input UI
 
+**Library implementation complete** (PR #41):
+- `maskText(text, pattern, replacement)` - Replace string or regex pattern in text. Supports both literal strings (uses `replaceAll`) and RegExp (auto-adds global flag).
+- `maskEvents(data, pattern, replacement)` - Apply masking to all output (`"o"`) events in an AsciicastData. Input events are left untouched. Returns a new immutable copy.
+- Tests cover: literal string replacement, regex replacement, case-insensitive regex, input event preservation, and immutability.
+
 ### PR 16: Event List / Text Editing
 - `src/components/EventList.tsx` - Scrollable event list
 - Direct text editing on output events (typo fixes)

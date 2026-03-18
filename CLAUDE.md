@@ -11,6 +11,6 @@
 
 ## Development Workflow
 - Run `npm run lint` and `npm test` before creating PRs.
-- Use TDD for library code (`src/lib/`): write tests first, then implementation.
+- Use TDD (Test-Driven Development): write tests first, then implement. This applies to all new code, not just library code.
 - Use top-down approach for UI code: skeleton first, then wire up.
 - Target ~100 lines of diff per PR for reviewability.

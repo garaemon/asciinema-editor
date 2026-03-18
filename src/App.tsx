@@ -5,6 +5,9 @@ import { Timeline } from './components/Timeline'
 import { SpeedControls } from './components/SpeedControls'
 import { TrimControls } from './components/TrimControls'
 import { ExportPanel } from './components/ExportPanel'
+import { FontSettings } from './components/FontSettings'
+import { DEFAULT_FONT_CONFIG } from './types/fontConfig'
+import type { FontConfig } from './types/fontConfig'
 import { serializeAsciicast } from './lib/serializer'
 import type { AsciicastData } from './types/asciicast'
 import type { Player as AsciinemaPlayerType } from 'asciinema-player'
@@ -21,6 +24,8 @@ interface EditingScreenProps {
   onDataChange: (data: AsciicastData) => void;
   onReset: () => void;
   hasChanges: boolean;
+  fontConfig: FontConfig;
+  onFontConfigChange: (config: FontConfig) => void;
 }
 
 function computeTotalDuration(data: AsciicastData): number {
@@ -30,7 +35,7 @@ function computeTotalDuration(data: AsciicastData): number {
   return data.events[data.events.length - 1][0];
 }
 
-function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges }: EditingScreenProps) {
+function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges, fontConfig, onFontConfigChange }: EditingScreenProps) {
   const [playerInstance, setPlayerInstance] = useState<AsciinemaPlayerType | null>(null);
 
   const handlePlayerReady = useCallback((player: AsciinemaPlayerType) => {
@@ -58,7 +63,7 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges }:
         </div>
         <div className="sidebar-panel">
           <h3>Font</h3>
-          <p className="placeholder">Font settings will appear here</p>
+          <FontSettings fontConfig={fontConfig} onFontConfigChange={onFontConfigChange} />
         </div>
         <div className="sidebar-panel">
           <h3>Annotations</h3>
@@ -71,6 +76,7 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges }:
             castContent={castContent}
             width={data.header.width}
             height={data.header.height}
+            fontConfig={fontConfig}
             onPlayerReady={handlePlayerReady}
             onPlayerDispose={handlePlayerDispose}
           />
@@ -88,6 +94,7 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges }:
 
 function App() {
   const [screen, setScreen] = useState<AppScreen>('upload')
+  const [fontConfig, setFontConfig] = useState<FontConfig>(DEFAULT_FONT_CONFIG)
   const [asciicastData, setAsciicastData] = useState<AsciicastData | null>(null)
   // Stores the original data at file load time so trim operations can be reverted
   const [originalData, setOriginalData] = useState<AsciicastData | null>(null)
@@ -146,6 +153,8 @@ function App() {
             onDataChange={handleDataChange}
             onReset={handleReset}
             hasChanges={asciicastData !== originalData}
+            fontConfig={fontConfig}
+            onFontConfigChange={setFontConfig}
           />
         )}
         {screen === 'export' && asciicastData && (

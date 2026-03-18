@@ -30,6 +30,7 @@ const DEFAULT_PROPS = {
   castContent: CAST_CONTENT,
   width: 80,
   height: 24,
+  fontConfig: { fontFamily: "" },
   onPlayerReady: noopReady,
   onPlayerDispose: noopDispose,
 };
@@ -91,5 +92,28 @@ describe("Player", () => {
     render(<Player {...DEFAULT_PROPS} />);
     expect(noopReady).toHaveBeenCalledTimes(1);
     expect(noopReady).toHaveBeenCalledWith(mockCreate.mock.results[0].value);
+  });
+
+  it("passes terminalFontFamily when fontConfig has a font family", () => {
+    render(<Player {...DEFAULT_PROPS} fontConfig={{ fontFamily: "Fira Code" }} />);
+    const [, , opts] = mockCreate.mock.calls[0];
+    expect(opts.terminalFontFamily).toBe("Fira Code");
+  });
+
+  it("does not set terminalFontFamily when fontConfig has empty font family", () => {
+    render(<Player {...DEFAULT_PROPS} fontConfig={{ fontFamily: "" }} />);
+    const [, , opts] = mockCreate.mock.calls[0];
+    expect(opts.terminalFontFamily).toBeUndefined();
+  });
+
+  it("recreates player when fontConfig changes", () => {
+    const { rerender } = render(<Player {...DEFAULT_PROPS} fontConfig={{ fontFamily: "Fira Code" }} />);
+    expect(mockCreate).toHaveBeenCalledTimes(1);
+
+    rerender(<Player {...DEFAULT_PROPS} fontConfig={{ fontFamily: "JetBrains Mono" }} />);
+    expect(mockDispose).toHaveBeenCalledTimes(1);
+    expect(mockCreate).toHaveBeenCalledTimes(2);
+    const [, , opts] = mockCreate.mock.calls[1];
+    expect(opts.terminalFontFamily).toBe("JetBrains Mono");
   });
 });

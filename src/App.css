@@ -165,6 +165,7 @@ body {
   height: 100%;
 }
 
+
 .timeline-area {
   height: 56px;
   border-top: 1px solid #333;
@@ -350,4 +351,28 @@ body {
   margin-bottom: 12px;
   font-size: 18px;
   font-weight: 600;
+}
+
+/* Font settings */
+.font-select {
+  width: 100%;
+  padding: 4px 6px;
+  background: #0f0f1a;
+  border: 1px solid #444;
+  border-radius: 3px;
+  color: #e0e0e0;
+  font-size: 13px;
+}
+
+.font-checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.font-local-hint {
+  color: #a88;
+  font-size: 11px;
+  margin-top: 4px;
 }

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import type { AsciicastData } from '../types/asciicast';
 import { serializeAsciicast } from '../lib/serializer';
 import { Player } from './Player';
+import { DEFAULT_FONT_CONFIG } from '../types/fontConfig';
 import type { GifExportOptions } from '../lib/gif-exporter';
 
 const DEFAULT_GIF_OPTIONS: GifExportOptions = {
@@ -125,6 +126,7 @@ export function ExportPanel({ data, castContent }: ExportPanelProps) {
           castContent={castContent}
           width={data.header.width}
           height={data.header.height}
+          fontConfig={DEFAULT_FONT_CONFIG}
           onPlayerReady={handlePlayerReady}
           onPlayerDispose={handlePlayerDispose}
         />

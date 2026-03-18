@@ -305,6 +305,9 @@ body {
 /* Export options */
 .export-options {
   margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .export-button {
@@ -315,7 +318,6 @@ body {
   color: #e0e0e0;
   cursor: pointer;
   font-size: 15px;
-  margin-bottom: 12px;
 }
 
 .export-button:hover {

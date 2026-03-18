@@ -6,6 +6,8 @@ interface ExportPanelProps {
   data: AsciicastData;
 }
 
+type Mp4State = 'idle' | 'loading' | 'ready' | 'error';
+
 function triggerDownload(content: string, filename: string) {
   const blob = new Blob([content], { type: 'application/x-asciicast' });
   const url = URL.createObjectURL(blob);
@@ -17,7 +19,7 @@ function triggerDownload(content: string, filename: string) {
 }
 
 export function ExportPanel({ data }: ExportPanelProps) {
-  const [mp4Loading, setMp4Loading] = useState(false);
+  const [mp4State, setMp4State] = useState<Mp4State>('idle');
   const [mp4Progress, setMp4Progress] = useState(0);
 
   const handleExportCast = () => {
@@ -25,17 +27,44 @@ export function ExportPanel({ data }: ExportPanelProps) {
     triggerDownload(serialized, 'edited.cast');
   };
 
-  const handleExportMp4 = async () => {
-    setMp4Loading(true);
+  const handleLoadFfmpeg = async () => {
+    setMp4State('loading');
     setMp4Progress(0);
     try {
       const { loadFfmpeg } = await import('../lib/mp4-exporter');
-      await loadFfmpeg((ratio) => setMp4Progress(ratio));
-      // Full frame capture + encoding will be implemented when
-      // the player element can be accessed from the export screen
-      setMp4Loading(false);
+      await loadFfmpeg((progress) => setMp4Progress(progress));
+      setMp4State('ready');
     } catch {
-      setMp4Loading(false);
+      setMp4State('error');
+    }
+  };
+
+  const renderMp4Button = () => {
+    switch (mp4State) {
+    case 'idle':
+      return (
+        <button className="export-button" onClick={handleLoadFfmpeg}>
+          Download MP4
+        </button>
+      );
+    case 'loading':
+      return (
+        <button className="export-button" disabled>
+          Loading ffmpeg... {Math.round(mp4Progress * 100)}%
+        </button>
+      );
+    case 'ready':
+      return (
+        <button className="export-button" disabled>
+          Download MP4 (encoding not yet implemented)
+        </button>
+      );
+    case 'error':
+      return (
+        <button className="export-button" onClick={handleLoadFfmpeg}>
+          Download MP4 (load failed — click to retry)
+        </button>
+      );
     }
   };
 
@@ -46,16 +75,10 @@ export function ExportPanel({ data }: ExportPanelProps) {
         <button className="export-button" onClick={handleExportCast}>
           Download .cast
         </button>
-        <button
-          className="export-button"
-          onClick={handleExportMp4}
-          disabled={mp4Loading}
-        >
-          {mp4Loading
-            ? `Loading ffmpeg... ${Math.round(mp4Progress * 100)}%`
-            : 'Download MP4'}
+        {renderMp4Button()}
+        <button className="export-button" disabled>
+          Download GIF (coming soon)
         </button>
-        <p className="placeholder">GIF export coming soon</p>
       </div>
     </div>
   );

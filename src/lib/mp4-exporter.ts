@@ -21,7 +21,7 @@ export async function loadFfmpeg(onProgress?: (ratio: number) => void): Promise<
   }
   const ffmpeg = new FFmpeg();
   if (onProgress) {
-    ffmpeg.on('progress', ({ ratio }) => onProgress(ratio));
+    ffmpeg.on('progress', ({ progress }) => onProgress(progress));
   }
   const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
   await ffmpeg.load({

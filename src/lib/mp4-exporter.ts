@@ -14,6 +14,11 @@ export const DEFAULT_MP4_OPTIONS: Mp4ExportOptions = {
 
 let ffmpegInstance: FFmpeg | null = null;
 
+// Reset cached instance (for testing)
+export function resetFfmpegInstance(): void {
+  ffmpegInstance = null;
+}
+
 // Lazy-load ffmpeg.wasm (~25MB) only when needed
 export async function loadFfmpeg(onProgress?: (ratio: number) => void): Promise<FFmpeg> {
   if (ffmpegInstance) {

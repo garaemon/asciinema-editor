@@ -140,7 +140,7 @@ export function ExportPanel({ data, castContent }: ExportPanelProps) {
           onClick={handleExportGif}
           disabled={isExporting}
         >
-          {isExporting ? 'Exporting...' : 'Download GIF'}
+          {isExporting ? 'Exporting...' : 'Download GIF (static only)'}
         </button>
         {renderMp4Button()}
       </div>

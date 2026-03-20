@@ -302,12 +302,20 @@ body {
   background: #3a3a5a;
 }
 
+/* Export preview */
+.export-preview {
+  margin-bottom: 16px;
+  width: 640px;
+  height: 400px;
+}
+
 /* Export options */
 .export-options {
   margin-top: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  align-items: center;
 }
 
 .export-button {

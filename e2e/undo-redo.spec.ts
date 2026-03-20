@@ -107,6 +107,44 @@ test.describe("Undo/Redo", () => {
     await expect(speedInput).toHaveValue("3");
   });
 
+  test("speed multiplier resets to default after undo", async ({ page }) => {
+    await uploadSampleFile(page);
+
+    const speedInput = page.locator("#speed-multiplier");
+
+    // Change multiplier and apply
+    await speedInput.fill("3");
+    await page.getByRole("button", { name: "Apply" }).click();
+
+    // Value should persist after apply
+    await expect(speedInput).toHaveValue("3");
+
+    // Undo should reset speed input to default
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect(speedInput).toHaveValue("1");
+  });
+
+  test("idle compression values reset after undo", async ({ page }) => {
+    await uploadSampleFile(page);
+
+    const thresholdInput = page.locator("#idle-threshold");
+    const compressToInput = page.locator("#compressed-duration");
+
+    // Change idle compression and apply
+    await thresholdInput.fill("1");
+    await compressToInput.fill("0.2");
+    await page.getByRole("button", { name: "Compress" }).click();
+
+    // Values should persist after compress
+    await expect(thresholdInput).toHaveValue("1");
+    await expect(compressToInput).toHaveValue("0.2");
+
+    // Undo should reset to defaults
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect(thresholdInput).toHaveValue("2");
+    await expect(compressToInput).toHaveValue("0.5");
+  });
+
   test("font config reverts on undo", async ({ page }) => {
     await uploadSampleFile(page);
 

@@ -11,15 +11,6 @@ export function SpeedControls({ data, onDataChange }: SpeedControlsProps) {
   const [multiplier, setMultiplier] = useState(1.0);
   const [idleThreshold, setIdleThreshold] = useState(2.0);
   const [compressedDuration, setCompressedDuration] = useState(0.5);
-  const [previousData, setPreviousData] = useState(data);
-
-  // Reset input values when data changes (e.g. undo/redo)
-  if (data !== previousData) {
-    setPreviousData(data);
-    setMultiplier(1.0);
-    setIdleThreshold(2.0);
-    setCompressedDuration(0.5);
-  }
 
   const handleApplySpeed = () => {
     if (multiplier <= 0) {

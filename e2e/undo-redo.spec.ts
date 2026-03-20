@@ -93,7 +93,7 @@ test.describe("Undo/Redo", () => {
     await expect(trimEndLabel).toHaveText(afterTrimLabel!);
   });
 
-  test("speed controls reset to defaults after undo", async ({ page }) => {
+  test("speed multiplier value persists after apply", async ({ page }) => {
     await uploadSampleFile(page);
 
     const speedInput = page.locator("#speed-multiplier");
@@ -103,14 +103,7 @@ test.describe("Undo/Redo", () => {
     await speedInput.fill("3");
     await page.getByRole("button", { name: "Apply" }).click();
 
-    // After applying, speed input should still show the value
-    // (data changed, so it resets to default)
-    await expect(speedInput).toHaveValue("1");
-
-    // Undo the speed change
-    await page.getByRole("button", { name: "Undo" }).click();
-
-    // Speed input should be reset to default
-    await expect(speedInput).toHaveValue("1");
+    // Speed input should keep the user's value after applying
+    await expect(speedInput).toHaveValue("3");
   });
 });

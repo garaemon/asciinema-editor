@@ -103,6 +103,7 @@ function App() {
     push: pushHistory,
     undo: undoHistory,
     redo: redoHistory,
+    reset: resetHistory,
   } = useHistory<AsciicastData | null>(null);
   // Stores the original data at file load time so trim operations can be reverted
   const [originalData, setOriginalData] = useState<AsciicastData | null>(null)
@@ -117,7 +118,7 @@ function App() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleFileLoaded = (data: AsciicastData, _rawContent: string) => {
-    pushHistory(data)
+    resetHistory(data)
     setOriginalData(data)
     setScreen('editing')
   }

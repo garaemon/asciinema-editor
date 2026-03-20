@@ -7,6 +7,7 @@ export interface UseHistoryResult<T> {
   push: (value: T) => void;
   undo: () => void;
   redo: () => void;
+  reset: (value: T) => void;
 }
 
 interface HistoryState<T> {
@@ -60,6 +61,14 @@ export function useHistory<T>(initialValue: T): UseHistoryResult<T> {
     });
   }, []);
 
+  const reset = useCallback((value: T) => {
+    setState({
+      past: [],
+      present: value,
+      future: [],
+    });
+  }, []);
+
   return {
     current: state.present,
     canUndo: state.past.length > 0,
@@ -67,5 +76,6 @@ export function useHistory<T>(initialValue: T): UseHistoryResult<T> {
     push,
     undo,
     redo,
+    reset,
   };
 }

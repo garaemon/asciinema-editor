@@ -111,4 +111,37 @@ describe('useHistory', () => {
     expect(result.current.current).toBe(second);
     expect(result.current.canRedo).toBe(false);
   });
+
+  describe('reset', () => {
+    it('should set new value and clear all history', () => {
+      const { result } = renderHook(() => useHistory(initial));
+      act(() => {
+        result.current.push(second);
+        result.current.push(third);
+      });
+      act(() => {
+        result.current.reset({ value: 'fresh' });
+      });
+      expect(result.current.current).toEqual({ value: 'fresh' });
+      expect(result.current.canUndo).toBe(false);
+      expect(result.current.canRedo).toBe(false);
+    });
+
+    it('should not allow undo back to null initial value', () => {
+      const { result } = renderHook(() => useHistory<{ value: string } | null>(null));
+      act(() => {
+        result.current.reset({ value: 'loaded' });
+      });
+      expect(result.current.current).toEqual({ value: 'loaded' });
+      expect(result.current.canUndo).toBe(false);
+      act(() => {
+        result.current.push({ value: 'edited' });
+      });
+      act(() => {
+        result.current.undo();
+      });
+      expect(result.current.current).toEqual({ value: 'loaded' });
+      expect(result.current.canUndo).toBe(false);
+    });
+  });
 });

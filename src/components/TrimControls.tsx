@@ -20,6 +20,14 @@ export function TrimControls({ data, onDataChange, onReset, hasChanges }: TrimCo
   const [startTime, setStartTime] = useState(0);
   const maxTime = computeMaxTime(data);
   const [endTime, setEndTime] = useState(maxTime);
+  const [previousData, setPreviousData] = useState(data);
+
+  // Sync input values when data changes (e.g. undo/redo)
+  if (data !== previousData) {
+    setPreviousData(data);
+    setStartTime(0);
+    setEndTime(maxTime);
+  }
 
   const handleTrimStart = () => {
     if (startTime < 0) {

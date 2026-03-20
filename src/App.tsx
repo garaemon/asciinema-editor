@@ -93,20 +93,27 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges, f
   )
 }
 
+interface AppState {
+  data: AsciicastData;
+  fontConfig: FontConfig;
+}
+
 function App() {
   const [screen, setScreen] = useState<AppScreen>('upload')
-  const [fontConfig, setFontConfig] = useState<FontConfig>(DEFAULT_FONT_CONFIG)
   const {
-    current: asciicastData,
+    current: appState,
     canUndo,
     canRedo,
     push: pushHistory,
     undo: undoHistory,
     redo: redoHistory,
     reset: resetHistory,
-  } = useHistory<AsciicastData | null>(null);
+  } = useHistory<AppState | null>(null);
   // Stores the original data at file load time so trim operations can be reverted
   const [originalData, setOriginalData] = useState<AsciicastData | null>(null)
+
+  const asciicastData = appState?.data ?? null;
+  const fontConfig = appState?.fontConfig ?? DEFAULT_FONT_CONFIG;
 
   // Derive castContent from asciicastData so undo/redo automatically updates it
   const castContent = useMemo(() => {
@@ -118,18 +125,24 @@ function App() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleFileLoaded = (data: AsciicastData, _rawContent: string) => {
-    resetHistory(data)
+    resetHistory({ data, fontConfig: DEFAULT_FONT_CONFIG })
     setOriginalData(data)
     setScreen('editing')
   }
 
   const handleDataChange = (updatedData: AsciicastData) => {
-    pushHistory(updatedData)
+    pushHistory({ data: updatedData, fontConfig })
+  }
+
+  const handleFontConfigChange = (config: FontConfig) => {
+    if (appState) {
+      pushHistory({ ...appState, fontConfig: config })
+    }
   }
 
   const handleReset = () => {
     if (originalData) {
-      pushHistory(originalData)
+      pushHistory({ data: originalData, fontConfig })
     }
   }
 
@@ -172,9 +185,9 @@ function App() {
             castContent={castContent}
             onDataChange={handleDataChange}
             onReset={handleReset}
-            hasChanges={asciicastData !== originalData}
+            hasChanges={appState?.data !== originalData}
             fontConfig={fontConfig}
-            onFontConfigChange={setFontConfig}
+            onFontConfigChange={handleFontConfigChange}
           />
         )}
         {screen === 'export' && asciicastData && (

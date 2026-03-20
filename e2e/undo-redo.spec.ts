@@ -106,4 +106,19 @@ test.describe("Undo/Redo", () => {
     // Speed input should keep the user's value after applying
     await expect(speedInput).toHaveValue("3");
   });
+
+  test("font config reverts on undo", async ({ page }) => {
+    await uploadSampleFile(page);
+
+    const fontSelect = page.locator(".font-select");
+    await expect(fontSelect).toHaveValue("");
+
+    // Change font
+    await fontSelect.selectOption("Fira Code");
+    await expect(fontSelect).toHaveValue("Fira Code");
+
+    // Undo should revert font
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect(fontSelect).toHaveValue("");
+  });
 });

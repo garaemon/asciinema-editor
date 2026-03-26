@@ -29,7 +29,7 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npx vitest run --coverage
-      - uses: codecov/codecov-action@1f60566a86da84c4b4b64c17662a90de97fbb8d7 # v5.4.2
+      - uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d # v5.5.2
         with:
           files: coverage/lcov.info
           fail_ci_if_error: false

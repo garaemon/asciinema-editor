@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
+import { useHistory } from './hooks/useHistory'
 import { FileUpload } from './components/FileUpload'
 import { Player } from './components/Player'
 import { Timeline } from './components/Timeline'
@@ -92,30 +93,56 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges, f
   )
 }
 
+interface AppState {
+  data: AsciicastData;
+  fontConfig: FontConfig;
+}
+
 function App() {
   const [screen, setScreen] = useState<AppScreen>('upload')
-  const [fontConfig, setFontConfig] = useState<FontConfig>(DEFAULT_FONT_CONFIG)
-  const [asciicastData, setAsciicastData] = useState<AsciicastData | null>(null)
+  const {
+    current: appState,
+    canUndo,
+    canRedo,
+    push: pushHistory,
+    undo: undoHistory,
+    redo: redoHistory,
+    reset: resetHistory,
+  } = useHistory<AppState | null>(null);
   // Stores the original data at file load time so trim operations can be reverted
   const [originalData, setOriginalData] = useState<AsciicastData | null>(null)
-  const [castContent, setCastContent] = useState('')
 
-  const handleFileLoaded = (data: AsciicastData, rawContent: string) => {
-    setAsciicastData(data)
+  const asciicastData = appState?.data ?? null;
+  const fontConfig = appState?.fontConfig ?? DEFAULT_FONT_CONFIG;
+
+  // Derive castContent from asciicastData so undo/redo automatically updates it
+  const castContent = useMemo(() => {
+    if (asciicastData) {
+      return serializeAsciicast(asciicastData);
+    }
+    return '';
+  }, [asciicastData]);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleFileLoaded = (data: AsciicastData, _rawContent: string) => {
+    resetHistory({ data, fontConfig: DEFAULT_FONT_CONFIG })
     setOriginalData(data)
-    setCastContent(rawContent)
     setScreen('editing')
   }
 
   const handleDataChange = (updatedData: AsciicastData) => {
-    setAsciicastData(updatedData)
-    setCastContent(serializeAsciicast(updatedData))
+    pushHistory({ data: updatedData, fontConfig })
+  }
+
+  const handleFontConfigChange = (config: FontConfig) => {
+    if (appState) {
+      pushHistory({ ...appState, fontConfig: config })
+    }
   }
 
   const handleReset = () => {
     if (originalData) {
-      setAsciicastData(originalData)
-      setCastContent(serializeAsciicast(originalData))
+      pushHistory({ data: originalData, fontConfig })
     }
   }
 
@@ -137,6 +164,12 @@ function App() {
             >
               Export
             </button>
+            <button disabled={!canUndo} onClick={undoHistory}>
+              Undo
+            </button>
+            <button disabled={!canRedo} onClick={redoHistory}>
+              Redo
+            </button>
           </nav>
         )}
       </header>
@@ -152,9 +185,9 @@ function App() {
             castContent={castContent}
             onDataChange={handleDataChange}
             onReset={handleReset}
-            hasChanges={asciicastData !== originalData}
+            hasChanges={appState?.data !== originalData}
             fontConfig={fontConfig}
-            onFontConfigChange={setFontConfig}
+            onFontConfigChange={handleFontConfigChange}
           />
         )}
         {screen === 'export' && asciicastData && (

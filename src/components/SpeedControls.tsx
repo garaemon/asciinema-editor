@@ -11,12 +11,27 @@ export function SpeedControls({ data, onDataChange }: SpeedControlsProps) {
   const [multiplier, setMultiplier] = useState(1.0);
   const [idleThreshold, setIdleThreshold] = useState(2.0);
   const [compressedDuration, setCompressedDuration] = useState(0.5);
+  // Track expected next data to distinguish self-triggered changes from undo/redo
+  const [expectedData, setExpectedData] = useState<AsciicastData | null>(null);
+  const [previousData, setPreviousData] = useState(data);
+
+  if (data !== previousData) {
+    setPreviousData(data);
+    // Reset only when the change came from outside (undo/redo), not from our own apply
+    if (data !== expectedData) {
+      setMultiplier(1.0);
+      setIdleThreshold(2.0);
+      setCompressedDuration(0.5);
+    }
+    setExpectedData(null);
+  }
 
   const handleApplySpeed = () => {
     if (multiplier <= 0) {
       return;
     }
     const updated = applySpeedMultiplier(data, multiplier);
+    setExpectedData(updated);
     onDataChange(updated);
   };
 
@@ -25,6 +40,7 @@ export function SpeedControls({ data, onDataChange }: SpeedControlsProps) {
       return;
     }
     const updated = compressIdleTime(data, idleThreshold, compressedDuration);
+    setExpectedData(updated);
     onDataChange(updated);
   };
 

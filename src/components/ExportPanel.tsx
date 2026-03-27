@@ -1,14 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import type { AsciicastData } from '../types/asciicast';
 import { serializeAsciicast } from '../lib/serializer';
 import { Player } from './Player';
 import { DEFAULT_FONT_CONFIG } from '../types/fontConfig';
-import type { GifExportOptions } from '../lib/gif-exporter';
-
-const DEFAULT_GIF_OPTIONS: GifExportOptions = {
-  fps: 10,
-  quality: 10,
-};
+import { useExport } from '../hooks/useExport';
+import type { Player as AsciinemaPlayer } from 'asciinema-player';
 
 interface ExportPanelProps {
   data: AsciicastData;
@@ -16,6 +12,17 @@ interface ExportPanelProps {
 }
 
 type Mp4State = 'idle' | 'loading' | 'ready' | 'error';
+
+// Compute recording duration from header or last event timestamp
+function computeDuration(data: AsciicastData): number {
+  if (data.header.duration) {
+    return data.header.duration;
+  }
+  if (data.events.length === 0) {
+    return 0;
+  }
+  return data.events[data.events.length - 1].time;
+}
 
 function triggerDownload(content: string, filename: string) {
   const blob = new Blob([content], { type: 'application/x-asciicast' });
@@ -38,19 +45,21 @@ function triggerBlobDownload(data: Uint8Array, filename: string, mimeType: strin
 }
 
 export function ExportPanel({ data, castContent }: ExportPanelProps) {
-  const [gifOptions] = useState<GifExportOptions>(DEFAULT_GIF_OPTIONS);
-  const [isExporting, setIsExporting] = useState(false);
+  const [gifFps, setGifFps] = useState(10);
+  const [gifQuality, setGifQuality] = useState(10);
   const [mp4State, setMp4State] = useState<Mp4State>('idle');
   const [mp4Progress, setMp4Progress] = useState(0);
   const playerContainerRef = useRef<HTMLDivElement>(null);
+  const playerInstanceRef = useRef<AsciinemaPlayer | null>(null);
+  const { isExporting, progress, exportGif } = useExport();
 
-  const handlePlayerReady = () => {
-    // Player is ready for GIF capture
-  };
+  const handlePlayerReady = useCallback((player: AsciinemaPlayer) => {
+    playerInstanceRef.current = player;
+  }, []);
 
-  const handlePlayerDispose = () => {
-    // No-op
-  };
+  const handlePlayerDispose = useCallback(() => {
+    playerInstanceRef.current = null;
+  }, []);
 
   const handleExportCast = () => {
     const serialized = serializeAsciicast(data);
@@ -59,21 +68,18 @@ export function ExportPanel({ data, castContent }: ExportPanelProps) {
 
   const handleExportGif = async () => {
     const playerElement = playerContainerRef.current;
-    if (!playerElement) {
+    const player = playerInstanceRef.current;
+    if (!playerElement || !player) {
       return;
     }
-    setIsExporting(true);
-    try {
-      const { captureFrame, renderFrameToCanvas, encodeGif } = await import('../lib/gif-exporter');
-      const image = await captureFrame(playerElement);
-      const canvas = document.createElement('canvas');
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
-      const imageData = await renderFrameToCanvas(image, canvas);
-      const gifData = encodeGif([imageData], canvas.width, canvas.height, gifOptions);
+
+    const duration = computeDuration(data);
+    const gifData = await exportGif(playerElement, player, duration, {
+      fps: gifFps,
+      quality: gifQuality,
+    });
+    if (gifData) {
       triggerBlobDownload(gifData, 'recording.gif', 'image/gif');
-    } finally {
-      setIsExporting(false);
     }
   };
 
@@ -135,13 +141,44 @@ export function ExportPanel({ data, castContent }: ExportPanelProps) {
         <button className="export-button" onClick={handleExportCast}>
           Download .cast
         </button>
+        <div className="gif-controls">
+          <label>
+            FPS: {gifFps}
+            <input
+              type="range" min={1} max={30} value={gifFps}
+              onChange={(e) => setGifFps(Number(e.target.value))}
+              disabled={isExporting}
+            />
+          </label>
+          <label>
+            Quality: {gifQuality}
+            <input
+              type="range" min={1} max={30} value={gifQuality}
+              onChange={(e) => setGifQuality(Number(e.target.value))}
+              disabled={isExporting}
+            />
+          </label>
+          <span className="gif-frame-estimate">
+            ~{Math.ceil(computeDuration(data) * gifFps)} frames
+          </span>
+        </div>
         <button
           className="export-button export-button-gif"
           onClick={handleExportGif}
           disabled={isExporting}
         >
-          {isExporting ? 'Exporting...' : 'Download GIF (static only)'}
+          {isExporting
+            ? `Exporting GIF... ${Math.round(progress * 100)}%`
+            : 'Download Animated GIF'}
         </button>
+        {isExporting && (
+          <div className="export-progress">
+            <div
+              className="export-progress-bar"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+        )}
         {renderMp4Button()}
       </div>
     </div>

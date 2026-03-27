@@ -391,10 +391,11 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - Full recording playback to MP4
 - Progress indicator during export
 
-### PR 20: E2E Tests
+### PR 20: E2E Tests (DONE)
 - `e2e/` - Playwright tests for full user flows
 - File upload, editing, export scenarios
 - Playwright configuration
+- Speed controls, trim controls, and reset button e2e tests
 
 ### Phase E: Infrastructure (DONE)
 

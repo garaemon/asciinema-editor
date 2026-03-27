@@ -2,13 +2,14 @@ import { useState, useRef, useCallback } from 'react';
 import type { AsciicastData } from '../types/asciicast';
 import { serializeAsciicast } from '../lib/serializer';
 import { Player } from './Player';
-import { DEFAULT_FONT_CONFIG } from '../types/fontConfig';
+import type { FontConfig } from '../types/fontConfig';
 import { useExport } from '../hooks/useExport';
 import type { Player as AsciinemaPlayer } from 'asciinema-player';
 
 interface ExportPanelProps {
   data: AsciicastData;
   castContent: string;
+  fontConfig: FontConfig;
 }
 
 type Mp4State = 'idle' | 'loading' | 'ready' | 'error';
@@ -21,7 +22,7 @@ function computeDuration(data: AsciicastData): number {
   if (data.events.length === 0) {
     return 0;
   }
-  return data.events[data.events.length - 1].time;
+  return data.events[data.events.length - 1][0];
 }
 
 function triggerDownload(content: string, filename: string) {
@@ -44,7 +45,7 @@ function triggerBlobDownload(data: Uint8Array, filename: string, mimeType: strin
   URL.revokeObjectURL(url);
 }
 
-export function ExportPanel({ data, castContent }: ExportPanelProps) {
+export function ExportPanel({ data, castContent, fontConfig }: ExportPanelProps) {
   const [gifFps, setGifFps] = useState(10);
   const [gifQuality, setGifQuality] = useState(10);
   const [mp4State, setMp4State] = useState<Mp4State>('idle');
@@ -132,7 +133,7 @@ export function ExportPanel({ data, castContent }: ExportPanelProps) {
           castContent={castContent}
           width={data.header.width}
           height={data.header.height}
-          fontConfig={DEFAULT_FONT_CONFIG}
+          fontConfig={fontConfig}
           onPlayerReady={handlePlayerReady}
           onPlayerDispose={handlePlayerDispose}
         />
@@ -141,21 +142,23 @@ export function ExportPanel({ data, castContent }: ExportPanelProps) {
         <button className="export-button" onClick={handleExportCast}>
           Download .cast
         </button>
-        <div className="gif-controls">
-          <label>
-            FPS: {gifFps}
+        <div className="gif-controls" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ minWidth: '80px' }}>FPS: {gifFps}</span>
             <input
               type="range" min={1} max={30} value={gifFps}
               onChange={(e) => setGifFps(Number(e.target.value))}
               disabled={isExporting}
+              style={{ flex: 1 }}
             />
           </label>
-          <label>
-            Quality: {gifQuality}
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ minWidth: '80px' }}>Quality: {gifQuality}</span>
             <input
               type="range" min={1} max={30} value={gifQuality}
               onChange={(e) => setGifQuality(Number(e.target.value))}
               disabled={isExporting}
+              style={{ flex: 1 }}
             />
           </label>
           <span className="gif-frame-estimate">

@@ -14,8 +14,6 @@ interface ExportPanelProps {
   duration: number;
 }
 
-type Mp4State = 'idle' | 'exporting' | 'error';
-
 function triggerDownload(content: string, filename: string) {
   const blob = new Blob([content], { type: 'application/x-asciicast' });
   const url = URL.createObjectURL(blob);
@@ -39,12 +37,10 @@ function triggerBlobDownload(data: Uint8Array, filename: string, mimeType: strin
 export function ExportPanel({ data, castContent, fontConfig, duration }: ExportPanelProps) {
   const [gifFps, setGifFps] = useState(10);
   const [gifQuality, setGifQuality] = useState(10);
-  const [mp4State, setMp4State] = useState<Mp4State>('idle');
-  const [mp4Progress, setMp4Progress] = useState(0);
   const [mp4Fps, setMp4Fps] = useState(15);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerInstanceRef = useRef<AsciinemaPlayer | null>(null);
-  const { isExporting, progress, exportGif } = useExport();
+  const { isExporting, progress, hasError, exportGif, exportMp4 } = useExport();
 
   const handlePlayerReady = useCallback((player: AsciinemaPlayer) => {
     playerInstanceRef.current = player;
@@ -74,37 +70,21 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
     }
   };
 
-  const computeTotalDuration = (): number => {
-    if (data.events.length === 0) {
-      return 0;
-    }
-    return data.events[data.events.length - 1][0];
-  };
-
   const handleExportMp4 = async () => {
     const playerElement = playerContainerRef.current;
     const player = playerInstanceRef.current;
     if (!playerElement || !player) {
       return;
     }
-
-    setMp4State('exporting');
-    setMp4Progress(0);
-    try {
-      const { captureAndEncodeMp4 } = await import('../lib/mp4-exporter');
-      const mp4Data = await captureAndEncodeMp4(
-        playerElement, player, computeTotalDuration(),
-        { fps: mp4Fps, onProgress: setMp4Progress },
-      );
+    const mp4Data = await exportMp4(playerElement, player, duration, {
+      fps: mp4Fps,
+    });
+    if (mp4Data) {
       triggerBlobDownload(mp4Data, 'recording.mp4', 'video/mp4');
-      setMp4State('idle');
-    } catch {
-      setMp4State('error');
     }
   };
 
   const renderMp4Controls = () => {
-    const isActive = mp4State === 'exporting';
     return (
       <div className="mp4-controls">
         <label className="fps-label">
@@ -112,7 +92,7 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
           <select
             value={mp4Fps}
             onChange={(e) => setMp4Fps(Number(e.target.value))}
-            disabled={isActive}
+            disabled={isExporting}
           >
             <option value={10}>10</option>
             <option value={15}>15</option>
@@ -123,11 +103,11 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
         <button
           className="export-button"
           onClick={handleExportMp4}
-          disabled={isActive}
+          disabled={isExporting}
         >
-          {isActive
-            ? `Exporting MP4... ${Math.round(mp4Progress * 100)}%`
-            : mp4State === 'error'
+          {isExporting
+            ? `Exporting MP4... ${Math.round(progress * 100)}%`
+            : hasError
               ? 'Download MP4 (failed — retry)'
               : 'Download MP4'}
         </button>

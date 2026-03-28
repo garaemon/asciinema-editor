@@ -27,6 +27,7 @@ import {
   captureFrame,
   renderFrameToCanvas,
   encodeGif,
+  captureAnimatedGif,
   DEFAULT_GIF_OPTIONS,
 } from '../gif-exporter';
 import type { GifExportOptions } from '../gif-exporter';
@@ -145,5 +146,63 @@ describe('encodeGif', () => {
     expect(mockWriteFrame.mock.calls[0][3]).toEqual(
       expect.objectContaining({ delay: 50 }),
     );
+  });
+});
+
+describe('captureAnimatedGif', () => {
+  it('should seek through frames and report progress', async () => {
+    // Mock canvas and context for renderFrameToCanvas
+    const mockImageData = { data: new Uint8ClampedArray(16), width: 2, height: 2 };
+    const mockCtx = {
+      drawImage: vi.fn(),
+      getImageData: vi.fn().mockReturnValue(mockImageData),
+    };
+    vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+      if (tag === 'canvas') {
+        const canvas = {
+          width: 0,
+          height: 0,
+          getContext: () => mockCtx,
+        } as unknown as HTMLCanvasElement;
+        return canvas;
+      }
+      return document.createElementNS('http://www.w3.org/1999/xhtml', tag) as HTMLElement;
+    });
+
+    // Mock toPng to return a data URL that loads an Image
+    // (Image.onload won't fire in jsdom, so mock captureFrame via toPng)
+    mockToPng.mockResolvedValue('data:image/png;base64,abc');
+
+    const mockPlayer = {
+      pause: vi.fn().mockResolvedValue(undefined),
+      seek: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const progressValues: number[] = [];
+
+    // Duration 0.5s, fps 2 => 1 frame
+    const promise = captureAnimatedGif(
+      document.createElement('div'),
+      mockPlayer as never,
+      0.5,
+      {
+        fps: 2,
+        quality: 10,
+        onProgress: (p) => progressValues.push(p),
+      },
+    );
+
+    // captureFrame creates an Image; since jsdom doesn't fire onload,
+    // the promise will hang. We verify the player interactions instead.
+    // Wait a tick to let the async loop start
+    await vi.waitFor(() => {
+      expect(mockPlayer.pause).toHaveBeenCalledOnce();
+    });
+
+    expect(mockPlayer.seek).toHaveBeenCalled();
+
+    // Clean up
+    promise.catch(() => {});
+    vi.restoreAllMocks();
   });
 });

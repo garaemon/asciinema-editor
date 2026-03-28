@@ -29,6 +29,7 @@ interface EditingScreenProps {
   onFontConfigChange: (config: FontConfig) => void;
 }
 
+/** Compute total duration from the last event's timestamp. Single source of truth — used by both EditingScreen and ExportPanel. */
 function computeTotalDuration(data: AsciicastData): number {
   if (data.events.length === 0) {
     return 0;

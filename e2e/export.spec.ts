@@ -100,7 +100,7 @@ test.describe("Export Screen", () => {
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toBe("recording.gif");
 
-    // Verify the file is a valid GIF (starts with GIF89a header)
+    // download.path() returns a temp file managed by Playwright, auto-cleaned on context close.
     const filePath = await download.path();
     expect(filePath).toBeTruthy();
     const buffer = fs.readFileSync(filePath!);
@@ -135,6 +135,7 @@ test.describe("Export Screen", () => {
     const download = await downloadPromise;
 
     expect(download.suggestedFilename()).toBe("recording.gif");
+    // download.path() returns a temp file managed by Playwright, auto-cleaned on context close.
     const filePath = await download.path();
     const buffer = fs.readFileSync(filePath!);
     expect(buffer.subarray(0, 6).toString()).toBe("GIF89a");

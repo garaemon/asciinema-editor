@@ -192,7 +192,7 @@ function App() {
         )}
         {screen === 'export' && asciicastData && (
           <div className="export-screen">
-            <ExportPanel data={asciicastData} castContent={castContent} fontConfig={fontConfig} />
+            <ExportPanel data={asciicastData} castContent={castContent} fontConfig={fontConfig} duration={computeTotalDuration(asciicastData)} />
           </div>
         )}
       </main>

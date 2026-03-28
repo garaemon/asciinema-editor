@@ -10,20 +10,10 @@ interface ExportPanelProps {
   data: AsciicastData;
   castContent: string;
   fontConfig: FontConfig;
+  duration: number;
 }
 
 type Mp4State = 'idle' | 'loading' | 'ready' | 'error';
-
-// Compute recording duration from header or last event timestamp
-function computeDuration(data: AsciicastData): number {
-  if (data.header.duration) {
-    return data.header.duration;
-  }
-  if (data.events.length === 0) {
-    return 0;
-  }
-  return data.events[data.events.length - 1][0];
-}
 
 function triggerDownload(content: string, filename: string) {
   const blob = new Blob([content], { type: 'application/x-asciicast' });
@@ -45,7 +35,7 @@ function triggerBlobDownload(data: Uint8Array, filename: string, mimeType: strin
   URL.revokeObjectURL(url);
 }
 
-export function ExportPanel({ data, castContent, fontConfig }: ExportPanelProps) {
+export function ExportPanel({ data, castContent, fontConfig, duration }: ExportPanelProps) {
   const [gifFps, setGifFps] = useState(10);
   const [gifQuality, setGifQuality] = useState(10);
   const [mp4State, setMp4State] = useState<Mp4State>('idle');
@@ -74,7 +64,7 @@ export function ExportPanel({ data, castContent, fontConfig }: ExportPanelProps)
       return;
     }
 
-    const duration = computeDuration(data);
+    const duration = duration;
     const gifData = await exportGif(playerElement, player, duration, {
       fps: gifFps,
       quality: gifQuality,
@@ -162,7 +152,7 @@ export function ExportPanel({ data, castContent, fontConfig }: ExportPanelProps)
             />
           </label>
           <span className="gif-frame-estimate">
-            ~{Math.ceil(computeDuration(data) * gifFps)} frames
+            ~{Math.ceil(duration * gifFps)} frames
           </span>
         </div>
         <button

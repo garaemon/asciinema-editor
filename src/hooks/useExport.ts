@@ -18,6 +18,8 @@ export interface UseExportResult {
  *
  * @example
  * const { isExporting, progress, exportGif } = useExport();
+ * // isExporting and progress update reactively during export.
+ * // exportGif resolves with the final data only after all frames are captured.
  * const data = await exportGif(playerEl, player, duration, { fps: 10 });
  */
 export function useExport(): UseExportResult {

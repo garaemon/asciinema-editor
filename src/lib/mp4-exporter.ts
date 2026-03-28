@@ -92,7 +92,10 @@ export async function captureFrameAsPng(element: HTMLElement): Promise<Uint8Arra
   return convertDataUrlToBytes(dataUrl);
 }
 
-// Wait for DOM to settle after a player seek
+// Wait for DOM to settle after a player seek.
+// 80ms is a heuristic: asciinema-player needs at least one rAF (~16ms) to
+// render the new frame, plus extra time for complex terminal content. 80ms
+// gives roughly 5 animation frames of headroom for reliable captures.
 function waitForRender(ms = 80): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

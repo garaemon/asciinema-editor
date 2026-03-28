@@ -77,7 +77,7 @@ export async function captureAnimatedGif(
   totalDuration: number,
   options?: AnimatedGifOptions,
 ): Promise<Uint8Array> {
-  const fps = options?.fps ?? 10;
+  const fps = Math.max(1, options?.fps ?? 10);
   const quality = options?.quality ?? 10;
   const onProgress = options?.onProgress;
 

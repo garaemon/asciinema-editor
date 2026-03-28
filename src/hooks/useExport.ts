@@ -13,8 +13,13 @@ export interface UseExportResult {
   ) => Promise<Uint8Array | null>;
   cancelExport: () => void;
 }
-
-// Orchestrate GIF export with progress tracking and cancellation
+/**
+ * Orchestrate GIF/MP4 export with progress tracking and cancellation.
+ *
+ * @example
+ * const { isExporting, progress, exportGif } = useExport();
+ * const data = await exportGif(playerEl, player, duration, { fps: 10 });
+ */
 export function useExport(): UseExportResult {
   const [isExporting, setIsExporting] = useState(false);
   const [progress, setProgress] = useState(0);

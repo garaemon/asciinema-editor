@@ -10,6 +10,7 @@ interface ExportPanelProps {
   data: AsciicastData;
   castContent: string;
   fontConfig: FontConfig;
+  /** Pre-computed from data.events by App.tsx's computeTotalDuration to avoid duplicating the calculation logic. */
   duration: number;
 }
 
@@ -63,8 +64,6 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
     if (!playerElement || !player) {
       return;
     }
-
-    const duration = duration;
     const gifData = await exportGif(playerElement, player, duration, {
       fps: gifFps,
       quality: gifQuality,

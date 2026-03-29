@@ -26,9 +26,17 @@ vi.mock('@ffmpeg/util', () => ({
   ),
 }));
 
+// Mock html-to-image for captureFrameAsPng
+const mockToPng = vi.fn().mockResolvedValue('data:image/png;base64,AAAA');
+vi.mock('html-to-image', () => ({
+  toPng: (...args: unknown[]) => mockToPng(...args),
+}));
+
 import {
   loadFfmpeg,
   encodeMp4,
+  captureFrameAsPng,
+  captureAndEncodeMp4,
   resetFfmpegInstance,
   DEFAULT_MP4_OPTIONS,
 } from '../mp4-exporter';
@@ -141,5 +149,67 @@ describe('encodeMp4', () => {
     await expect(
       encodeMp4(ffmpeg, [new Uint8Array([1])], DEFAULT_MP4_OPTIONS),
     ).rejects.toThrow('Unexpected string output from ffmpeg');
+  });
+});
+
+describe('captureFrameAsPng', () => {
+  it('should call toPng and return Uint8Array', async () => {
+    // base64 "AAAA" decodes to 3 zero bytes
+    mockToPng.mockResolvedValueOnce('data:image/png;base64,AAAA');
+    const element = document.createElement('div');
+
+    const result = await captureFrameAsPng(element);
+
+    expect(mockToPng).toHaveBeenCalledWith(element);
+    expect(result).toBeInstanceOf(Uint8Array);
+  });
+});
+
+describe('captureAndEncodeMp4', () => {
+  it('should seek player to each frame time and capture', async () => {
+    const mockSeek = vi.fn();
+    const mockPause = vi.fn();
+    const player = { play: vi.fn().mockResolvedValue(undefined), seek: mockSeek, pause: mockPause };
+    const element = document.createElement('div');
+
+    // 0.1s duration at 10fps = 1 frame
+    const result = await captureAndEncodeMp4(element, player, 0.1, {
+      fps: 10,
+      onProgress: vi.fn(),
+    });
+
+    expect(mockPause).toHaveBeenCalled();
+    expect(mockSeek).toHaveBeenCalled();
+    expect(result).toBeInstanceOf(Uint8Array);
+  });
+
+  it('should report progress through onProgress callback', async () => {
+    const mockSeek = vi.fn();
+    const mockPause = vi.fn();
+    const player = { play: vi.fn().mockResolvedValue(undefined), seek: mockSeek, pause: mockPause };
+    const element = document.createElement('div');
+    const onProgress = vi.fn();
+
+    await captureAndEncodeMp4(element, player, 0.1, {
+      fps: 10,
+      onProgress,
+    });
+
+    // Should have been called multiple times with increasing values
+    expect(onProgress).toHaveBeenCalled();
+    const lastCall = onProgress.mock.calls[onProgress.mock.calls.length - 1][0];
+    expect(lastCall).toBeGreaterThan(0);
+  });
+
+  it('should use default fps of 30 when not specified', async () => {
+    const mockSeek = vi.fn();
+    const mockPause = vi.fn();
+    const player = { play: vi.fn().mockResolvedValue(undefined), seek: mockSeek, pause: mockPause };
+    const element = document.createElement('div');
+
+    // 1/30 second = exactly 1 frame at 30fps
+    await captureAndEncodeMp4(element, player, 1 / 30);
+
+    expect(mockSeek).toHaveBeenCalled();
   });
 });

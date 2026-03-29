@@ -409,7 +409,14 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 ### DevSecOps Pipeline (DONE)
 - Dependabot, Gitleaks, CodeQL, supply chain hardening
 
-### Phase F: Format Support
+### Phase F: Export Enhancements
+
+### PR 22: Configurable Export Resolution
+- Add resolution/width control to GIF and MP4 export UI
+- The `width` option already exists in both exporters but is not exposed in the UI
+- Slider or preset selector (e.g., 480p, 720p, 1080p)
+
+### Phase G: Format Support
 
 ### PR 21: Asciicast v3 Support
 - Update parser to handle v3 format (relative timestamps, comment lines with `#`, tags)

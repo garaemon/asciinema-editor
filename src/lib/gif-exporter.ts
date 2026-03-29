@@ -81,6 +81,9 @@ export async function captureAnimatedGif(
   const quality = options?.quality ?? 10;
   const onProgress = options?.onProgress;
 
+  // Play then immediately pause to dismiss the start overlay (play button
+  // triangle) so it does not appear in captured frames.
+  await player.play();
   await player.pause();
 
   const totalFrames = Math.max(1, Math.ceil(totalDuration * fps));

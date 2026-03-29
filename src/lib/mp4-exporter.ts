@@ -103,7 +103,7 @@ function waitForRender(ms = 80): Promise<void> {
 // Capture all frames from a player and encode as MP4
 export async function captureAndEncodeMp4(
   playerElement: HTMLElement,
-  player: { seek: (time: number) => void; pause: () => void },
+  player: { play: () => Promise<void>; seek: (time: number) => void; pause: () => void },
   totalDuration: number,
   options?: {
     fps?: number;
@@ -124,6 +124,9 @@ export async function captureAndEncodeMp4(
   onProgress?.(0.1);
 
   // Phase 2: Capture frames (0.1 - 0.8)
+  // Play then immediately pause to dismiss the start overlay (play button
+  // triangle) so it does not appear in captured frames.
+  await player.play();
   player.pause();
   const totalFrames = Math.max(1, Math.ceil(totalDuration * fps));
   const frames: Uint8Array[] = [];

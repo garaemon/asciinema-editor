@@ -40,7 +40,10 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
   const [mp4Fps, setMp4Fps] = useState(15);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerInstanceRef = useRef<AsciinemaPlayer | null>(null);
-  const { isExporting, progress, hasError, exportGif, exportMp4 } = useExport();
+  const { exportingFormat, progress, hasError, exportGif, exportMp4 } = useExport();
+  const isExportingGif = exportingFormat === 'gif';
+  const isExportingMp4 = exportingFormat === 'mp4';
+  const isExporting = exportingFormat !== null;
 
   const handlePlayerReady = useCallback((player: AsciinemaPlayer) => {
     playerInstanceRef.current = player;
@@ -86,26 +89,25 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
 
   const renderMp4Controls = () => {
     return (
-      <div className="mp4-controls">
-        <label className="fps-label">
-          FPS:
-          <select
-            value={mp4Fps}
+      <div className="mp4-controls" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ minWidth: '80px' }}>FPS: {mp4Fps}</span>
+          <input
+            type="range" min={1} max={30} value={mp4Fps}
             onChange={(e) => setMp4Fps(Number(e.target.value))}
             disabled={isExporting}
-          >
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-            <option value={24}>24</option>
-            <option value={30}>30</option>
-          </select>
+            style={{ flex: 1 }}
+          />
         </label>
+        <span className="mp4-frame-estimate">
+          ~{Math.ceil(duration * mp4Fps)} frames
+        </span>
         <button
           className="export-button"
           onClick={handleExportMp4}
           disabled={isExporting}
         >
-          {isExporting
+          {isExportingMp4
             ? `Exporting MP4... ${Math.round(progress * 100)}%`
             : hasError
               ? 'Download MP4 (failed — retry)'
@@ -160,11 +162,11 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
           onClick={handleExportGif}
           disabled={isExporting}
         >
-          {isExporting
+          {isExportingGif
             ? `Exporting GIF... ${Math.round(progress * 100)}%`
             : 'Download Animated GIF'}
         </button>
-        {isExporting && (
+        {isExportingGif && (
           <div className="export-progress">
             <div
               className="export-progress-bar"

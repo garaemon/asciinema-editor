@@ -169,7 +169,7 @@ describe('captureAndEncodeMp4', () => {
   it('should seek player to each frame time and capture', async () => {
     const mockSeek = vi.fn();
     const mockPause = vi.fn();
-    const player = { seek: mockSeek, pause: mockPause };
+    const player = { play: vi.fn().mockResolvedValue(undefined), seek: mockSeek, pause: mockPause };
     const element = document.createElement('div');
 
     // 0.1s duration at 10fps = 1 frame
@@ -186,7 +186,7 @@ describe('captureAndEncodeMp4', () => {
   it('should report progress through onProgress callback', async () => {
     const mockSeek = vi.fn();
     const mockPause = vi.fn();
-    const player = { seek: mockSeek, pause: mockPause };
+    const player = { play: vi.fn().mockResolvedValue(undefined), seek: mockSeek, pause: mockPause };
     const element = document.createElement('div');
     const onProgress = vi.fn();
 
@@ -204,7 +204,7 @@ describe('captureAndEncodeMp4', () => {
   it('should use default fps of 30 when not specified', async () => {
     const mockSeek = vi.fn();
     const mockPause = vi.fn();
-    const player = { seek: mockSeek, pause: mockPause };
+    const player = { play: vi.fn().mockResolvedValue(undefined), seek: mockSeek, pause: mockPause };
     const element = document.createElement('div');
 
     // 1/30 second = exactly 1 frame at 30fps

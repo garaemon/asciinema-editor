@@ -174,6 +174,7 @@ describe('captureAnimatedGif', () => {
     mockToPng.mockResolvedValue('data:image/png;base64,abc');
 
     const mockPlayer = {
+      play: vi.fn().mockResolvedValue(undefined),
       pause: vi.fn().mockResolvedValue(undefined),
       seek: vi.fn().mockResolvedValue(undefined),
     };

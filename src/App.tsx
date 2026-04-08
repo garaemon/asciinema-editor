@@ -5,6 +5,7 @@ import { Player } from './components/Player'
 import { Timeline } from './components/Timeline'
 import { SpeedControls } from './components/SpeedControls'
 import { TrimControls } from './components/TrimControls'
+import { MaskControls } from './components/MaskControls'
 import { EventList } from './components/EventList'
 import { ExportPanel } from './components/ExportPanel'
 import { FontSettings } from './components/FontSettings'
@@ -62,7 +63,7 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges, f
         </div>
         <div className="sidebar-panel">
           <h3>Mask</h3>
-          <p className="placeholder">Mask controls will appear here</p>
+          <MaskControls data={data} onDataChange={onDataChange} />
         </div>
         <div className="sidebar-panel">
           <h3>Font</h3>

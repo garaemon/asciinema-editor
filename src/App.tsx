@@ -5,6 +5,7 @@ import { Player } from './components/Player'
 import { Timeline } from './components/Timeline'
 import { SpeedControls } from './components/SpeedControls'
 import { TrimControls } from './components/TrimControls'
+import { EventList } from './components/EventList'
 import { ExportPanel } from './components/ExportPanel'
 import { FontSettings } from './components/FontSettings'
 import { DEFAULT_FONT_CONFIG } from './types/fontConfig'
@@ -88,6 +89,10 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges, f
             player={playerInstance}
             totalDuration={computeTotalDuration(data)}
           />
+        </div>
+        <div className="sidebar-panel" style={{ margin: '0 12px 12px' }}>
+          <h3>Events</h3>
+          <EventList data={data} onDataChange={onDataChange} />
         </div>
       </div>
     </div>

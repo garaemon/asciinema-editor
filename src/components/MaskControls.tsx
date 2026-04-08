@@ -11,7 +11,7 @@ function countMatches(data: AsciicastData, pattern: string | RegExp): number {
   let count = 0;
   for (const event of data.events) {
     if (event[1] !== 'o') {
-      continue; 
+      continue;
     }
     const text = event[2];
     // Count by replacing and comparing
@@ -47,7 +47,7 @@ export function MaskControls({ data, onDataChange }: MaskControlsProps) {
 
   const matchCount = useMemo(() => {
     if (!patternText) {
-      return 0; 
+      return 0;
     }
     try {
       const pattern = buildPattern(patternText, isRegex, isCaseInsensitive);
@@ -59,7 +59,7 @@ export function MaskControls({ data, onDataChange }: MaskControlsProps) {
 
   const handleApply = () => {
     if (!patternText) {
-      return; 
+      return;
     }
     try {
       const pattern = buildPattern(patternText, isRegex, isCaseInsensitive);

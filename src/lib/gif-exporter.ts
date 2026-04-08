@@ -1,5 +1,6 @@
 import { toPng } from 'html-to-image';
 import { GIFEncoder, quantize, applyPalette } from 'gifenc';
+import type { Player } from 'asciinema-player';
 
 export interface GifExportOptions {
   // Frames per second for the GIF (default: 10)
@@ -55,4 +56,58 @@ export function encodeGif(
   }
   gif.finish();
   return gif.bytes();
+}
+
+export interface AnimatedGifOptions {
+  fps?: number;
+  quality?: number;
+  width?: number;
+  onProgress?: (progress: number) => void;
+}
+
+// Wait for a given number of milliseconds
+function waitMs(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Capture multiple frames by seeking through the recording
+export async function captureAnimatedGif(
+  playerElement: HTMLElement,
+  player: Player,
+  totalDuration: number,
+  options?: AnimatedGifOptions,
+): Promise<Uint8Array> {
+  const fps = Math.max(1, options?.fps ?? 10);
+  const quality = options?.quality ?? 10;
+  const onProgress = options?.onProgress;
+
+  // Play then immediately pause to dismiss the start overlay (play button
+  // triangle) so it does not appear in captured frames.
+  await player.play();
+  await player.pause();
+
+  const totalFrames = Math.max(1, Math.ceil(totalDuration * fps));
+  const frames: ImageData[] = [];
+  const canvas = document.createElement('canvas');
+
+  // Seek and capture each frame
+  for (let i = 0; i < totalFrames; i++) {
+    const time = (i / fps);
+    await player.seek(time);
+    // Brief delay so the DOM re-renders after seeking
+    await waitMs(80);
+
+    const image = await captureFrame(playerElement);
+    if (i === 0) {
+      canvas.width = options?.width ?? image.naturalWidth;
+      const scale = canvas.width / image.naturalWidth;
+      canvas.height = Math.round(image.naturalHeight * scale);
+    }
+    const imageData = await renderFrameToCanvas(image, canvas);
+    frames.push(imageData);
+
+    onProgress?.((i + 1) / totalFrames);
+  }
+
+  return encodeGif(frames, canvas.width, canvas.height, { fps, quality });
 }

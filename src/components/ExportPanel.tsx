@@ -1,21 +1,18 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import type { AsciicastData } from '../types/asciicast';
 import { serializeAsciicast } from '../lib/serializer';
 import { Player } from './Player';
-import { DEFAULT_FONT_CONFIG } from '../types/fontConfig';
-import type { GifExportOptions } from '../lib/gif-exporter';
-
-const DEFAULT_GIF_OPTIONS: GifExportOptions = {
-  fps: 10,
-  quality: 10,
-};
+import type { FontConfig } from '../types/fontConfig';
+import { useExport } from '../hooks/useExport';
+import type { Player as AsciinemaPlayer } from 'asciinema-player';
 
 interface ExportPanelProps {
   data: AsciicastData;
   castContent: string;
+  fontConfig: FontConfig;
+  /** Pre-computed from data.events by App.tsx's computeTotalDuration to avoid duplicating the calculation logic. */
+  duration: number;
 }
-
-type Mp4State = 'idle' | 'loading' | 'ready' | 'error';
 
 function triggerDownload(content: string, filename: string) {
   const blob = new Blob([content], { type: 'application/x-asciicast' });
@@ -37,20 +34,24 @@ function triggerBlobDownload(data: Uint8Array, filename: string, mimeType: strin
   URL.revokeObjectURL(url);
 }
 
-export function ExportPanel({ data, castContent }: ExportPanelProps) {
-  const [gifOptions] = useState<GifExportOptions>(DEFAULT_GIF_OPTIONS);
-  const [isExporting, setIsExporting] = useState(false);
-  const [mp4State, setMp4State] = useState<Mp4State>('idle');
-  const [mp4Progress, setMp4Progress] = useState(0);
+export function ExportPanel({ data, castContent, fontConfig, duration }: ExportPanelProps) {
+  const [gifFps, setGifFps] = useState(10);
+  const [gifQuality, setGifQuality] = useState(10);
+  const [mp4Fps, setMp4Fps] = useState(15);
   const playerContainerRef = useRef<HTMLDivElement>(null);
+  const playerInstanceRef = useRef<AsciinemaPlayer | null>(null);
+  const { exportingFormat, progress, hasError, exportGif, exportMp4 } = useExport();
+  const isExportingGif = exportingFormat === 'gif';
+  const isExportingMp4 = exportingFormat === 'mp4';
+  const isExporting = exportingFormat !== null;
 
-  const handlePlayerReady = () => {
-    // Player is ready for GIF capture
-  };
+  const handlePlayerReady = useCallback((player: AsciinemaPlayer) => {
+    playerInstanceRef.current = player;
+  }, []);
 
-  const handlePlayerDispose = () => {
-    // No-op
-  };
+  const handlePlayerDispose = useCallback(() => {
+    playerInstanceRef.current = null;
+  }, []);
 
   const handleExportCast = () => {
     const serialized = serializeAsciicast(data);
@@ -59,63 +60,61 @@ export function ExportPanel({ data, castContent }: ExportPanelProps) {
 
   const handleExportGif = async () => {
     const playerElement = playerContainerRef.current;
-    if (!playerElement) {
+    const player = playerInstanceRef.current;
+    if (!playerElement || !player) {
       return;
     }
-    setIsExporting(true);
-    try {
-      const { captureFrame, renderFrameToCanvas, encodeGif } = await import('../lib/gif-exporter');
-      const image = await captureFrame(playerElement);
-      const canvas = document.createElement('canvas');
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
-      const imageData = await renderFrameToCanvas(image, canvas);
-      const gifData = encodeGif([imageData], canvas.width, canvas.height, gifOptions);
+    const gifData = await exportGif(playerElement, player, duration, {
+      fps: gifFps,
+      quality: gifQuality,
+    });
+    if (gifData) {
       triggerBlobDownload(gifData, 'recording.gif', 'image/gif');
-    } finally {
-      setIsExporting(false);
     }
   };
 
-  const handleLoadFfmpeg = async () => {
-    setMp4State('loading');
-    setMp4Progress(0);
-    try {
-      const { loadFfmpeg } = await import('../lib/mp4-exporter');
-      await loadFfmpeg((progress) => setMp4Progress(progress));
-      setMp4State('ready');
-    } catch {
-      setMp4State('error');
+  const handleExportMp4 = async () => {
+    const playerElement = playerContainerRef.current;
+    const player = playerInstanceRef.current;
+    if (!playerElement || !player) {
+      return;
+    }
+    const mp4Data = await exportMp4(playerElement, player, duration, {
+      fps: mp4Fps,
+    });
+    if (mp4Data) {
+      triggerBlobDownload(mp4Data, 'recording.mp4', 'video/mp4');
     }
   };
 
-  const renderMp4Button = () => {
-    switch (mp4State) {
-    case 'idle':
-      return (
-        <button className="export-button" onClick={handleLoadFfmpeg}>
-          Download MP4
+  const renderMp4Controls = () => {
+    return (
+      <div className="mp4-controls" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ minWidth: '80px' }}>FPS: {mp4Fps}</span>
+          <input
+            type="range" min={1} max={30} value={mp4Fps}
+            onChange={(e) => setMp4Fps(Number(e.target.value))}
+            disabled={isExporting}
+            style={{ flex: 1 }}
+          />
+        </label>
+        <span className="mp4-frame-estimate">
+          ~{Math.ceil(duration * mp4Fps)} frames
+        </span>
+        <button
+          className="export-button"
+          onClick={handleExportMp4}
+          disabled={isExporting}
+        >
+          {isExportingMp4
+            ? `Exporting MP4... ${Math.round(progress * 100)}%`
+            : hasError
+              ? 'Download MP4 (failed — retry)'
+              : 'Download MP4'}
         </button>
-      );
-    case 'loading':
-      return (
-        <button className="export-button" disabled>
-          Loading ffmpeg... {Math.round(mp4Progress * 100)}%
-        </button>
-      );
-    case 'ready':
-      return (
-        <button className="export-button" disabled>
-          Download MP4 (encoding not yet implemented)
-        </button>
-      );
-    case 'error':
-      return (
-        <button className="export-button" onClick={handleLoadFfmpeg}>
-          Download MP4 (load failed — click to retry)
-        </button>
-      );
-    }
+      </div>
+    );
   };
 
   return (
@@ -126,7 +125,7 @@ export function ExportPanel({ data, castContent }: ExportPanelProps) {
           castContent={castContent}
           width={data.header.width}
           height={data.header.height}
-          fontConfig={DEFAULT_FONT_CONFIG}
+          fontConfig={fontConfig}
           onPlayerReady={handlePlayerReady}
           onPlayerDispose={handlePlayerDispose}
         />
@@ -135,14 +134,47 @@ export function ExportPanel({ data, castContent }: ExportPanelProps) {
         <button className="export-button" onClick={handleExportCast}>
           Download .cast
         </button>
+        <div className="gif-controls" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ minWidth: '80px' }}>FPS: {gifFps}</span>
+            <input
+              type="range" min={1} max={30} value={gifFps}
+              onChange={(e) => setGifFps(Number(e.target.value))}
+              disabled={isExporting}
+              style={{ flex: 1 }}
+            />
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ minWidth: '80px' }}>Quality: {gifQuality}</span>
+            <input
+              type="range" min={1} max={30} value={gifQuality}
+              onChange={(e) => setGifQuality(Number(e.target.value))}
+              disabled={isExporting}
+              style={{ flex: 1 }}
+            />
+          </label>
+          <span className="gif-frame-estimate">
+            ~{Math.ceil(duration * gifFps)} frames
+          </span>
+        </div>
         <button
           className="export-button export-button-gif"
           onClick={handleExportGif}
           disabled={isExporting}
         >
-          {isExporting ? 'Exporting...' : 'Download GIF (static only)'}
+          {isExportingGif
+            ? `Exporting GIF... ${Math.round(progress * 100)}%`
+            : 'Download Animated GIF'}
         </button>
-        {renderMp4Button()}
+        {isExportingGif && (
+          <div className="export-progress">
+            <div
+              className="export-progress-bar"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+        )}
+        {renderMp4Controls()}
       </div>
     </div>
   );

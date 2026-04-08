@@ -6,6 +6,7 @@ import { Timeline } from './components/Timeline'
 import { SpeedControls } from './components/SpeedControls'
 import { TrimControls } from './components/TrimControls'
 import { MaskControls } from './components/MaskControls'
+import { EventList } from './components/EventList'
 import { ExportPanel } from './components/ExportPanel'
 import { FontSettings } from './components/FontSettings'
 import { DEFAULT_FONT_CONFIG } from './types/fontConfig'
@@ -30,6 +31,7 @@ interface EditingScreenProps {
   onFontConfigChange: (config: FontConfig) => void;
 }
 
+/** Compute total duration from the last event's timestamp. Single source of truth — used by both EditingScreen and ExportPanel. */
 function computeTotalDuration(data: AsciicastData): number {
   if (data.events.length === 0) {
     return 0;
@@ -88,6 +90,10 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges, f
             player={playerInstance}
             totalDuration={computeTotalDuration(data)}
           />
+        </div>
+        <div className="sidebar-panel" style={{ margin: '0 12px 12px' }}>
+          <h3>Events</h3>
+          <EventList data={data} onDataChange={onDataChange} />
         </div>
       </div>
     </div>
@@ -193,7 +199,7 @@ function App() {
         )}
         {screen === 'export' && asciicastData && (
           <div className="export-screen">
-            <ExportPanel data={asciicastData} castContent={castContent} />
+            <ExportPanel data={asciicastData} castContent={castContent} fontConfig={fontConfig} duration={computeTotalDuration(asciicastData)} />
           </div>
         )}
       </main>

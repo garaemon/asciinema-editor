@@ -1,5 +1,6 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { toBlobURL } from '@ffmpeg/util';
+import { toPng } from 'html-to-image';
 
 export interface Mp4ExportOptions {
   fps: number;
@@ -72,4 +73,78 @@ export async function encodeMp4(
     throw new Error('Unexpected string output from ffmpeg');
   }
   return outputData;
+}
+
+// Convert a data URL to Uint8Array
+function convertDataUrlToBytes(dataUrl: string): Uint8Array {
+  const base64 = dataUrl.split(',')[1];
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+// Capture a single frame from an HTML element as PNG bytes
+export async function captureFrameAsPng(element: HTMLElement): Promise<Uint8Array> {
+  const dataUrl = await toPng(element);
+  return convertDataUrlToBytes(dataUrl);
+}
+
+// Wait for DOM to settle after a player seek.
+// 80ms is a heuristic: asciinema-player needs at least one rAF (~16ms) to
+// render the new frame, plus extra time for complex terminal content. 80ms
+// gives roughly 5 animation frames of headroom for reliable captures.
+function waitForRender(ms = 80): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Capture all frames from a player and encode as MP4
+export async function captureAndEncodeMp4(
+  playerElement: HTMLElement,
+  player: { play: () => Promise<void>; seek: (time: number) => void; pause: () => void },
+  totalDuration: number,
+  options?: {
+    fps?: number;
+    width?: number;
+    onProgress?: (progress: number) => void;
+  },
+): Promise<Uint8Array> {
+  const fps = options?.fps ?? 30;
+  const width = options?.width ?? 800;
+  const onProgress = options?.onProgress;
+
+  onProgress?.(0);
+
+  // Phase 1: Load ffmpeg (0 - 0.1)
+  const ffmpeg = await loadFfmpeg((ratio) => {
+    onProgress?.(ratio * 0.1);
+  });
+  onProgress?.(0.1);
+
+  // Phase 2: Capture frames (0.1 - 0.8)
+  // Play then immediately pause to dismiss the start overlay (play button
+  // triangle) so it does not appear in captured frames.
+  await player.play();
+  player.pause();
+  const totalFrames = Math.max(1, Math.ceil(totalDuration * fps));
+  const frames: Uint8Array[] = [];
+
+  for (let i = 0; i < totalFrames; i++) {
+    const seekTime = i / fps;
+    player.seek(seekTime);
+    await waitForRender();
+    const frameData = await captureFrameAsPng(playerElement);
+    frames.push(frameData);
+    onProgress?.(0.1 + (0.7 * (i + 1)) / totalFrames);
+  }
+
+  // Phase 3: Encode (0.8 - 1.0)
+  onProgress?.(0.8);
+  const mp4Options: Mp4ExportOptions = { fps, width };
+  const mp4Data = await encodeMp4(ffmpeg, frames, mp4Options);
+  onProgress?.(1.0);
+
+  return mp4Data;
 }

@@ -37,7 +37,9 @@ function triggerBlobDownload(data: Uint8Array, filename: string, mimeType: strin
 export function ExportPanel({ data, castContent, fontConfig, duration }: ExportPanelProps) {
   const [gifFps, setGifFps] = useState(10);
   const [gifQuality, setGifQuality] = useState(10);
+  const [gifWidth, setGifWidth] = useState(640);
   const [mp4Fps, setMp4Fps] = useState(15);
+  const [mp4Width, setMp4Width] = useState(800);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerInstanceRef = useRef<AsciinemaPlayer | null>(null);
   const { exportingFormat, progress, hasError, exportGif, exportMp4 } = useExport();
@@ -67,6 +69,7 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
     const gifData = await exportGif(playerElement, player, duration, {
       fps: gifFps,
       quality: gifQuality,
+      width: gifWidth,
     });
     if (gifData) {
       triggerBlobDownload(gifData, 'recording.gif', 'image/gif');
@@ -81,6 +84,7 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
     }
     const mp4Data = await exportMp4(playerElement, player, duration, {
       fps: mp4Fps,
+      width: mp4Width,
     });
     if (mp4Data) {
       triggerBlobDownload(mp4Data, 'recording.mp4', 'video/mp4');
@@ -97,6 +101,16 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
             onChange={(e) => setMp4Fps(Number(e.target.value))}
             disabled={isExporting}
             style={{ flex: 1 }}
+          />
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ minWidth: '80px' }}>MP4 Width: {mp4Width}px</span>
+          <input
+            type="range" min={320} max={1920} step={80} value={mp4Width}
+            onChange={(e) => setMp4Width(Number(e.target.value))}
+            disabled={isExporting}
+            style={{ flex: 1 }}
+            aria-label="MP4 Width"
           />
         </label>
         <span className="mp4-frame-estimate">
@@ -151,6 +165,16 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
               onChange={(e) => setGifQuality(Number(e.target.value))}
               disabled={isExporting}
               style={{ flex: 1 }}
+            />
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ minWidth: '80px' }}>GIF Width: {gifWidth}px</span>
+            <input
+              type="range" min={320} max={1920} step={80} value={gifWidth}
+              onChange={(e) => setGifWidth(Number(e.target.value))}
+              disabled={isExporting}
+              style={{ flex: 1 }}
+              aria-label="GIF Width"
             />
           </label>
           <span className="gif-frame-estimate">

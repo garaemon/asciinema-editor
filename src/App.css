@@ -309,13 +309,35 @@ body {
   height: 400px;
 }
 
-/* Export options */
-.export-options {
+/* Export settings (shared controls) */
+.export-settings {
   margin-top: 16px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.frame-estimate {
+  font-size: 13px;
+  color: #999;
+  text-align: right;
+}
+
+/* Export download buttons */
+.export-buttons {
+  margin-top: 16px;
+  display: flex;
   gap: 12px;
-  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.export-progress-section {
+  margin-top: 12px;
+  text-align: center;
 }
 
 .export-button {

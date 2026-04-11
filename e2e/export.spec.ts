@@ -23,12 +23,11 @@ test.describe("Export Screen", () => {
     await page.goto("/");
   });
 
-  test("shows download buttons", async ({ page }) => {
+  test("shows format selector and download button", async ({ page }) => {
     await navigateToExportScreen(page);
 
-    await expect(page.getByRole("button", { name: "Download .cast" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Download Animated GIF" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Download MP4" })).toBeVisible();
+    await expect(page.getByLabel("Format")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Download" })).toBeVisible();
   });
 
   test("shows player preview on export screen", async ({ page }) => {
@@ -40,8 +39,9 @@ test.describe("Export Screen", () => {
   test("Download .cast triggers download", async ({ page }) => {
     await navigateToExportScreen(page);
 
+    await page.getByLabel("Format").selectOption("cast");
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download .cast" }).click();
+    await page.getByRole("button", { name: "Download" }).click();
     const download = await downloadPromise;
 
     expect(download.suggestedFilename()).toBe("edited.cast");
@@ -50,7 +50,7 @@ test.describe("Export Screen", () => {
   test("shows correct frame estimate for default settings", async ({ page }) => {
     await navigateToExportScreen(page);
 
-    // sample.cast is 2s long, default 10fps = ~20 frames
+    // Default is GIF, sample.cast is 2s long, default 10fps = ~20 frames
     await expect(page.getByText("~20 frames")).toBeVisible();
   });
 
@@ -76,7 +76,7 @@ test.describe("Export Screen", () => {
     await expect(page.getByRole("heading", { name: "Export" })).toBeVisible();
 
     // 2s / 2x = 1s, 10fps = ~10 frames (must not be NaN)
-    const frameEstimate = page.locator(".gif-frame-estimate");
+    const frameEstimate = page.locator(".frame-estimate");
     const text = await frameEstimate.textContent();
     expect(text).not.toContain("NaN");
     expect(text).toBe("~10 frames");
@@ -88,11 +88,12 @@ test.describe("Export Screen", () => {
     await page.getByTestId("player-container").waitFor({ state: "attached" });
     await page.waitForTimeout(1000);
 
-    const gifButton = page.getByRole("button", { name: "Download Animated GIF" });
-    await expect(gifButton).toBeEnabled();
+    // Default format is GIF
+    const downloadButton = page.getByRole("button", { name: "Download" });
+    await expect(downloadButton).toBeEnabled();
 
     const downloadPromise = page.waitForEvent("download", { timeout: 60000 });
-    await gifButton.click();
+    await downloadButton.click();
 
     // Verify progress indicator appears during export
     await expect(page.getByRole("button", { name: /Exporting GIF/ })).toBeVisible();
@@ -116,7 +117,7 @@ test.describe("Export Screen", () => {
     await page.getByRole("button", { name: "Apply" }).click();
 
     // Change font
-    await page.getByRole("combobox").selectOption("Fira Code");
+    await page.getByRole("combobox").first().selectOption("Fira Code");
 
     // Navigate to export
     await page.getByRole("button", { name: "Export" }).click();
@@ -125,13 +126,13 @@ test.describe("Export Screen", () => {
     await page.waitForTimeout(1000);
 
     // Verify frame count is valid
-    const frameEstimate = page.locator(".gif-frame-estimate");
+    const frameEstimate = page.locator(".frame-estimate");
     const text = await frameEstimate.textContent();
     expect(text).not.toContain("NaN");
 
     // Export GIF and verify download
     const downloadPromise = page.waitForEvent("download", { timeout: 60000 });
-    await page.getByRole("button", { name: "Download Animated GIF" }).click();
+    await page.getByRole("button", { name: "Download" }).click();
     const download = await downloadPromise;
 
     expect(download.suggestedFilename()).toBe("recording.gif");
@@ -139,5 +140,18 @@ test.describe("Export Screen", () => {
     const filePath = await download.path();
     const buffer = fs.readFileSync(filePath!);
     expect(buffer.subarray(0, 6).toString()).toBe("GIF89a");
+  });
+
+  test("hides media settings when cast format is selected", async ({ page }) => {
+    await navigateToExportScreen(page);
+
+    // Default is GIF - sliders should be visible
+    await expect(page.getByLabel("FPS")).toBeVisible();
+    await expect(page.getByLabel("Width")).toBeVisible();
+
+    // Switch to cast
+    await page.getByLabel("Format").selectOption("cast");
+    await expect(page.getByLabel("FPS")).not.toBeVisible();
+    await expect(page.getByLabel("Width")).not.toBeVisible();
   });
 });

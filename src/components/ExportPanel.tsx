@@ -34,18 +34,18 @@ function triggerBlobDownload(data: Uint8Array, filename: string, mimeType: strin
   URL.revokeObjectURL(url);
 }
 
+type ExportFormatOption = 'cast' | 'gif' | 'mp4';
+
 export function ExportPanel({ data, castContent, fontConfig, duration }: ExportPanelProps) {
-  const [gifFps, setGifFps] = useState(10);
+  const [selectedFormat, setSelectedFormat] = useState<ExportFormatOption>('gif');
+  const [fps, setFps] = useState(10);
+  const [width, setWidth] = useState(640);
   const [gifQuality, setGifQuality] = useState(10);
-  const [gifWidth, setGifWidth] = useState(640);
-  const [mp4Fps, setMp4Fps] = useState(15);
-  const [mp4Width, setMp4Width] = useState(800);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerInstanceRef = useRef<AsciinemaPlayer | null>(null);
   const { exportingFormat, progress, hasError, exportGif, exportMp4 } = useExport();
-  const isExportingGif = exportingFormat === 'gif';
-  const isExportingMp4 = exportingFormat === 'mp4';
   const isExporting = exportingFormat !== null;
+  const showMediaSettings = selectedFormat !== 'cast';
 
   const handlePlayerReady = useCallback((player: AsciinemaPlayer) => {
     playerInstanceRef.current = player;
@@ -67,9 +67,9 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
       return;
     }
     const gifData = await exportGif(playerElement, player, duration, {
-      fps: gifFps,
+      fps,
       quality: gifQuality,
-      width: gifWidth,
+      width,
     });
     if (gifData) {
       triggerBlobDownload(gifData, 'recording.gif', 'image/gif');
@@ -83,52 +83,33 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
       return;
     }
     const mp4Data = await exportMp4(playerElement, player, duration, {
-      fps: mp4Fps,
-      width: mp4Width,
+      fps,
+      width,
     });
     if (mp4Data) {
       triggerBlobDownload(mp4Data, 'recording.mp4', 'video/mp4');
     }
   };
 
-  const renderMp4Controls = () => {
-    return (
-      <div className="mp4-controls" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ minWidth: '80px' }}>FPS: {mp4Fps}</span>
-          <input
-            type="range" min={1} max={30} value={mp4Fps}
-            onChange={(e) => setMp4Fps(Number(e.target.value))}
-            disabled={isExporting}
-            style={{ flex: 1 }}
-          />
-        </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ minWidth: '80px' }}>MP4 Width: {mp4Width}px</span>
-          <input
-            type="range" min={320} max={1920} step={80} value={mp4Width}
-            onChange={(e) => setMp4Width(Number(e.target.value))}
-            disabled={isExporting}
-            style={{ flex: 1 }}
-            aria-label="MP4 Width"
-          />
-        </label>
-        <span className="mp4-frame-estimate">
-          ~{Math.ceil(duration * mp4Fps)} frames
-        </span>
-        <button
-          className="export-button"
-          onClick={handleExportMp4}
-          disabled={isExporting}
-        >
-          {isExportingMp4
-            ? `Exporting MP4... ${Math.round(progress * 100)}%`
-            : hasError
-              ? 'Download MP4 (failed — retry)'
-              : 'Download MP4'}
-        </button>
-      </div>
-    );
+  const handleDownload = () => {
+    if (selectedFormat === 'cast') {
+      handleExportCast();
+    } else if (selectedFormat === 'gif') {
+      handleExportGif();
+    } else {
+      handleExportMp4();
+    }
+  };
+
+  const buildButtonLabel = (): string => {
+    if (isExporting) {
+      const format = exportingFormat === 'gif' ? 'GIF' : 'MP4';
+      return `Exporting ${format}... ${Math.round(progress * 100)}%`;
+    }
+    if (hasError) {
+      return 'Download (retry)';
+    }
+    return 'Download';
   };
 
   return (
@@ -144,61 +125,77 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
           onPlayerDispose={handlePlayerDispose}
         />
       </div>
-      <div className="export-options">
-        <button className="export-button" onClick={handleExportCast}>
-          Download .cast
-        </button>
-        <div className="gif-controls" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ minWidth: '80px' }}>FPS: {gifFps}</span>
-            <input
-              type="range" min={1} max={30} value={gifFps}
-              onChange={(e) => setGifFps(Number(e.target.value))}
-              disabled={isExporting}
-              style={{ flex: 1 }}
-            />
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ minWidth: '80px' }}>Quality: {gifQuality}</span>
-            <input
-              type="range" min={1} max={30} value={gifQuality}
-              onChange={(e) => setGifQuality(Number(e.target.value))}
-              disabled={isExporting}
-              style={{ flex: 1 }}
-            />
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ minWidth: '80px' }}>GIF Width: {gifWidth}px</span>
-            <input
-              type="range" min={320} max={1920} step={80} value={gifWidth}
-              onChange={(e) => setGifWidth(Number(e.target.value))}
-              disabled={isExporting}
-              style={{ flex: 1 }}
-              aria-label="GIF Width"
-            />
-          </label>
-          <span className="gif-frame-estimate">
-            ~{Math.ceil(duration * gifFps)} frames
-          </span>
-        </div>
-        <button
-          className="export-button export-button-gif"
-          onClick={handleExportGif}
-          disabled={isExporting}
-        >
-          {isExportingGif
-            ? `Exporting GIF... ${Math.round(progress * 100)}%`
-            : 'Download Animated GIF'}
-        </button>
-        {isExportingGif && (
+      <div className="export-settings">
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ minWidth: '100px' }}>Format</span>
+          <select
+            value={selectedFormat}
+            onChange={(e) => setSelectedFormat(e.target.value as ExportFormatOption)}
+            disabled={isExporting}
+            style={{ flex: 1 }}
+            aria-label="Format"
+          >
+            <option value="cast">Asciicast (.cast)</option>
+            <option value="gif">Animated GIF</option>
+            <option value="mp4">MP4 Video</option>
+          </select>
+        </label>
+        {showMediaSettings && (
+          <>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ minWidth: '100px' }}>FPS: {fps}</span>
+              <input
+                type="range" min={1} max={30} value={fps}
+                onChange={(e) => setFps(Number(e.target.value))}
+                disabled={isExporting}
+                style={{ flex: 1 }}
+                aria-label="FPS"
+              />
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ minWidth: '100px' }}>Width: {width}px</span>
+              <input
+                type="range" min={320} max={1920} step={80} value={width}
+                onChange={(e) => setWidth(Number(e.target.value))}
+                disabled={isExporting}
+                style={{ flex: 1 }}
+                aria-label="Width"
+              />
+            </label>
+            {selectedFormat === 'gif' && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ minWidth: '100px' }}>Quality: {gifQuality}</span>
+                <input
+                  type="range" min={1} max={30} value={gifQuality}
+                  onChange={(e) => setGifQuality(Number(e.target.value))}
+                  disabled={isExporting}
+                  style={{ flex: 1 }}
+                  aria-label="Quality"
+                />
+              </label>
+            )}
+            <span className="frame-estimate">~{Math.ceil(duration * fps)} frames</span>
+          </>
+        )}
+      </div>
+      {isExporting && (
+        <div className="export-progress-section">
           <div className="export-progress">
             <div
               className="export-progress-bar"
               style={{ width: `${progress * 100}%` }}
             />
           </div>
-        )}
-        {renderMp4Controls()}
+        </div>
+      )}
+      <div className="export-buttons">
+        <button
+          className="export-button"
+          onClick={handleDownload}
+          disabled={isExporting}
+        >
+          {buildButtonLabel()}
+        </button>
       </div>
     </div>
   );

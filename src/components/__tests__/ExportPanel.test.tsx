@@ -35,43 +35,59 @@ const DEFAULT_PROPS = {
 };
 
 describe("ExportPanel", () => {
-  it("renders resolution width control for GIF", () => {
+  it("renders a single shared FPS slider", () => {
     render(<ExportPanel {...DEFAULT_PROPS} />);
-    expect(screen.getByLabelText(/GIF Width/i)).toBeInTheDocument();
+    const sliders = screen.getAllByLabelText(/FPS/i);
+    expect(sliders).toHaveLength(1);
   });
 
-  it("renders resolution width control for MP4", () => {
+  it("renders a single shared Width slider", () => {
     render(<ExportPanel {...DEFAULT_PROPS} />);
-    expect(screen.getByLabelText(/MP4 Width/i)).toBeInTheDocument();
+    const sliders = screen.getAllByLabelText(/Width/i);
+    expect(sliders).toHaveLength(1);
   });
 
-  it("shows default GIF width value", () => {
+  it("renders a GIF Quality slider", () => {
     render(<ExportPanel {...DEFAULT_PROPS} />);
-    const slider = screen.getByLabelText(/GIF Width/i) as HTMLInputElement;
-    expect(Number(slider.value)).toBe(640);
+    expect(screen.getByLabelText(/Quality/i)).toBeInTheDocument();
   });
 
-  it("shows default MP4 width value", () => {
+  it("shows default shared settings values", () => {
     render(<ExportPanel {...DEFAULT_PROPS} />);
-    const slider = screen.getByLabelText(/MP4 Width/i) as HTMLInputElement;
-    expect(Number(slider.value)).toBe(800);
+    const fpsSlider = screen.getByLabelText(/FPS/i) as HTMLInputElement;
+    const widthSlider = screen.getByLabelText(/Width/i) as HTMLInputElement;
+    expect(Number(fpsSlider.value)).toBe(10);
+    expect(Number(widthSlider.value)).toBe(640);
   });
 
-  it("GIF width slider has correct min/max/step attributes", () => {
+  it("width slider has correct min/max/step attributes", () => {
     render(<ExportPanel {...DEFAULT_PROPS} />);
-    const slider = screen.getByLabelText(/GIF Width/i) as HTMLInputElement;
+    const slider = screen.getByLabelText(/Width/i) as HTMLInputElement;
     expect(slider.min).toBe("320");
     expect(slider.max).toBe("1920");
     expect(slider.step).toBe("80");
   });
 
-  it("displays width value label for GIF", () => {
+  it("renders a format selector with three options", () => {
     render(<ExportPanel {...DEFAULT_PROPS} />);
-    expect(screen.getByText(/640px/)).toBeInTheDocument();
+    const select = screen.getByLabelText(/Format/i);
+    expect(select).toBeInTheDocument();
+    const options = screen.getAllByRole("option");
+    expect(options.map((o) => o.textContent)).toEqual([
+      "Asciicast (.cast)",
+      "Animated GIF",
+      "MP4 Video",
+    ]);
   });
 
-  it("displays width value label for MP4", () => {
+  it("renders a single download button", () => {
     render(<ExportPanel {...DEFAULT_PROPS} />);
-    expect(screen.getByText(/800px/)).toBeInTheDocument();
+    const buttons = screen.getAllByRole("button", { name: /Download/i });
+    expect(buttons).toHaveLength(1);
+  });
+
+  it("displays frame estimate", () => {
+    render(<ExportPanel {...DEFAULT_PROPS} />);
+    expect(screen.getByText(/~10 frames/)).toBeInTheDocument();
   });
 });

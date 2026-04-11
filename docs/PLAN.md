@@ -410,9 +410,9 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 ### DevSecOps Pipeline (DONE)
 - Dependabot, Gitleaks, CodeQL, supply chain hardening
 
-### Phase F: Export Enhancements
+### Phase F: Export Enhancements - DONE
 
-### PR 22: Configurable Export Resolution
+### PR 22: Configurable Export Resolution (DONE)
 - Add resolution/width control to GIF and MP4 export UI
 - The `width` option already exists in both exporters but is not exposed in the UI
 - Slider or preset selector (e.g., 480p, 720p, 1080p)

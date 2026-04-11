@@ -1,7 +1,7 @@
 # Project Instructions
 
 ## Progress Tracking
-- Always update `docs/PLAN.md` when creating a PR
+- Include `docs/PLAN.md` updates in each PR to track progress.
 - Mark completed items with `(DONE)` suffix in the PR/section title.
 - Mark completed phases with `- DONE` suffix in the phase title.
 - When adding new features or PRs not originally in the plan, add them to the appropriate phase section.

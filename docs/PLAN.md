@@ -367,26 +367,26 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - COOP/COEP headers in Vite dev server config
 - Dependencies: `@ffmpeg/ffmpeg`, `@ffmpeg/util`
 
-### Phase D: Polish & Extended Features
+### Phase D: Polish & Extended Features - DONE
 
 **Library implementation complete** (PR #41):
 - `maskText(text, pattern, replacement)` - Replace string or regex pattern in text. Supports both literal strings (uses `replaceAll`) and RegExp (auto-adds global flag).
 - `maskEvents(data, pattern, replacement)` - Apply masking to all output (`"o"`) events in an AsciicastData. Input events are left untouched. Returns a new immutable copy.
 - Tests cover: literal string replacement, regex replacement, case-insensitive regex, input event preservation, and immutability.
 
-### PR 16: Event List / Text Editing
+### PR 16: Event List / Text Editing (DONE)
 - `src/components/EventList.tsx` - Scrollable event list
 - Direct text editing on output events (typo fixes)
 
-### PR 15b: Mask Controls UI
+### PR 15b: Mask Controls UI (DONE)
 - `src/components/MaskControls.tsx` - Mask input UI wired to masker lib
 
-### PR 18b: Multi-Frame GIF Export
+### PR 18b: Multi-Frame GIF Export (DONE)
 - Full recording playback with frame capture at configurable FPS
 - `src/hooks/useExport.ts` - Export orchestration hook
 - Progress indicator during export
 
-### PR 19b: Full MP4 Export
+### PR 19b: Full MP4 Export (DONE)
 - Player element wiring for frame capture
 - Full recording playback to MP4
 - Progress indicator during export
@@ -410,9 +410,9 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 ### DevSecOps Pipeline (DONE)
 - Dependabot, Gitleaks, CodeQL, supply chain hardening
 
-### Phase F: Export Enhancements
+### Phase F: Export Enhancements - DONE
 
-### PR 22: Configurable Export Resolution
+### PR 22: Configurable Export Resolution (DONE)
 - Add resolution/width control to GIF and MP4 export UI
 - The `width` option already exists in both exporters but is not exposed in the UI
 - Slider or preset selector (e.g., 480p, 720p, 1080p)

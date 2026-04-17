@@ -145,7 +145,7 @@ Asciicast v2 uses NDJSON (Newline Delimited JSON) format:
 
 #### 4.14 UX Improvements
 - Keyboard shortcuts (Space for play/pause, Ctrl+Z/Y for undo/redo)
-- Auto-save to browser storage
+- Auto-save to browser storage (DONE)
 
 ### P2 - Future Extensions
 
@@ -424,3 +424,10 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - Auto-detect v2 vs v3 from header
 - Convert v3 relative times to absolute times internally for unified editing
 - Update serializer to export as v3 when source was v3
+
+### Phase H: UX Enhancements
+
+### PR 23: Auto-save to Browser Storage (DONE)
+- `src/hooks/useAutoSave.ts` - Generic debounced localStorage persistence hook with `clear()` API and `loadSavedValue()` helper
+- `src/hooks/__tests__/useAutoSave.test.ts` - TDD tests (fake timers + localStorage mocks, corrupt JSON handling)
+- `src/App.tsx` integration: persist `AsciicastData` under `asciinema-editor:v1:data`, auto-restore on mount with dismissable "Restored from last session" banner, "Clear saved data" action in header nav

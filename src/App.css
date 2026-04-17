@@ -376,3 +376,24 @@ body {
   font-size: 11px;
   margin-top: 4px;
 }
+
+.restored-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: #23314a;
+  color: #cfe1ff;
+  font-size: 13px;
+  border-bottom: 1px solid #2a3d5e;
+}
+
+.restored-banner button {
+  background: transparent;
+  color: #cfe1ff;
+  border: 1px solid #4a5e82;
+  padding: 2px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}

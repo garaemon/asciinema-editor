@@ -139,7 +139,7 @@ Asciicast v2 uses NDJSON (Newline Delimited JSON) format:
 - Path/username bulk replacement (e.g., `/home/john/` -> `/home/user/`)
 
 #### 4.13 Advanced Editing
-- Cut middle sections (remove trial-and-error segments)
+- Cut middle sections (library, DONE)
 - Terminal theme selection (Solarized, Dracula, etc.)
 - Before/After diff preview
 
@@ -424,3 +424,13 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - Auto-detect v2 vs v3 from header
 - Convert v3 relative times to absolute times internally for unified editing
 - Update serializer to export as v3 when source was v3
+
+### Phase H: Advanced Editing
+
+### PR 23: Cut Middle Sections (library, TDD) (DONE)
+- `src/lib/__tests__/cutter.test.ts` - Tests first (12 TDD tests)
+- `src/lib/cutter.ts` - `cutMiddle(data, startTime, endTime)` removes a middle
+  time range and shifts later event timestamps to keep playback continuous
+- Immutable: returns a new `AsciicastData`
+- Edge cases covered: empty range, full-range cut, empty events, invalid input
+- UI wiring deferred to a follow-up PR

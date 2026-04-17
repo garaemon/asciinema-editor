@@ -125,6 +125,13 @@ describe('useKeyboardShortcuts', () => {
     expect(event.defaultPrevented).toBe(true);
   });
 
+  it('should ignore auto-repeat Space events to avoid rapid play/pause toggling', () => {
+    const callbacks = createCallbacks();
+    renderHook(() => useKeyboardShortcuts(callbacks));
+    dispatchKey({ key: ' ', code: 'Space', repeat: true });
+    expect(callbacks.onPlayPause).not.toHaveBeenCalled();
+  });
+
   it('should detach listener on unmount', () => {
     const callbacks = createCallbacks();
     const { unmount } = renderHook(() => useKeyboardShortcuts(callbacks));

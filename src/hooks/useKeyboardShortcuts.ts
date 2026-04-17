@@ -50,6 +50,10 @@ function matchesPlayPause(event: KeyboardEvent): boolean {
   if (event.ctrlKey || event.metaKey || event.altKey) {
     return false;
   }
+  // Ignore auto-repeat so holding Space does not toggle play/pause rapidly.
+  if (event.repeat) {
+    return false;
+  }
   return event.key === ' ' || event.code === 'Space';
 }
 

@@ -1,5 +1,6 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useHistory } from './hooks/useHistory'
+import { useAutoSave, loadSavedValue } from './hooks/useAutoSave'
 import { FileUpload } from './components/FileUpload'
 import { Player } from './components/Player'
 import { Timeline } from './components/Timeline'
@@ -15,6 +16,8 @@ import { serializeAsciicast } from './lib/serializer'
 import type { AsciicastData } from './types/asciicast'
 import type { Player as AsciinemaPlayerType } from 'asciinema-player'
 import './App.css'
+
+const AUTOSAVE_STORAGE_KEY = 'asciinema-editor:v1:data'
 
 type AppScreen = 'upload' | 'editing' | 'export'
 
@@ -118,9 +121,25 @@ function App() {
   } = useHistory<AppState | null>(null);
   // Stores the original data at file load time so trim operations can be reverted
   const [originalData, setOriginalData] = useState<AsciicastData | null>(null)
+  const [showRestoredBanner, setShowRestoredBanner] = useState(false)
 
   const asciicastData = appState?.data ?? null;
   const fontConfig = appState?.fontConfig ?? DEFAULT_FONT_CONFIG;
+
+  const { clear: clearAutoSave } = useAutoSave(asciicastData, AUTOSAVE_STORAGE_KEY);
+
+  // Attempt to restore the previous session once on mount.
+  useEffect(() => {
+    const saved = loadSavedValue<AsciicastData>(AUTOSAVE_STORAGE_KEY);
+    if (saved && saved.header && Array.isArray(saved.events)) {
+      resetHistory({ data: saved, fontConfig: DEFAULT_FONT_CONFIG });
+      setOriginalData(saved);
+      setScreen('editing');
+      setShowRestoredBanner(true);
+    }
+    // Intentionally run only on mount; resetHistory identity is stable via useCallback.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Derive castContent from asciicastData so undo/redo automatically updates it
   const castContent = useMemo(() => {
@@ -153,6 +172,14 @@ function App() {
     }
   }
 
+  const handleClearSaved = () => {
+    clearAutoSave()
+    setShowRestoredBanner(false)
+    resetHistory(null)
+    setOriginalData(null)
+    setScreen('upload')
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -177,9 +204,18 @@ function App() {
             <button disabled={!canRedo} onClick={redoHistory}>
               Redo
             </button>
+            <button onClick={handleClearSaved} title="Remove the auto-saved session from this browser">
+              Clear saved data
+            </button>
           </nav>
         )}
       </header>
+      {showRestoredBanner && (
+        <div className="restored-banner" role="status">
+          <span>Restored from last session.</span>
+          <button onClick={() => setShowRestoredBanner(false)}>Dismiss</button>
+        </div>
+      )}
       <main className="app-main">
         {screen === 'upload' && (
           <div className="upload-screen">

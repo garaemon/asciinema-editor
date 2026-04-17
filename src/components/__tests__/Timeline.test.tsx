@@ -1,6 +1,7 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Timeline } from "../Timeline";
+import type { AsciicastEvent } from "../../types/asciicast";
 
 function createMockPlayer(overrides: Record<string, unknown> = {}) {
   return {
@@ -105,5 +106,28 @@ describe("Timeline", () => {
     expect(slider).toBeInTheDocument();
     expect(slider).toHaveAttribute("aria-valuemin", "0");
     expect(slider).toHaveAttribute("aria-valuemax", "10");
+  });
+
+  it("renders previous and next event buttons", () => {
+    const player = createMockPlayer();
+    const events: AsciicastEvent[] = [[1, "o", "a"], [2, "o", "b"]];
+    render(<Timeline player={player} totalDuration={2} events={events} />);
+    expect(screen.getByRole("button", { name: "Previous event" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Next event" })).toBeInTheDocument();
+  });
+
+  it("disables previous button at the start", () => {
+    const player = createMockPlayer({ getCurrentTime: vi.fn().mockResolvedValue(0) });
+    const events: AsciicastEvent[] = [[1, "o", "a"], [2, "o", "b"]];
+    render(<Timeline player={player} totalDuration={2} events={events} />);
+    expect(screen.getByRole("button", { name: "Previous event" })).toBeDisabled();
+  });
+
+  it("seeks to the next event when next button is clicked", async () => {
+    const player = createMockPlayer({ getCurrentTime: vi.fn().mockResolvedValue(0) });
+    const events: AsciicastEvent[] = [[1, "o", "a"], [2, "o", "b"]];
+    render(<Timeline player={player} totalDuration={2} events={events} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next event" }));
+    await waitFor(() => expect(player.seek).toHaveBeenCalledWith(1));
   });
 });

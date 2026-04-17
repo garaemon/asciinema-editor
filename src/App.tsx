@@ -89,6 +89,7 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges, f
           <Timeline
             player={playerInstance}
             totalDuration={computeTotalDuration(data)}
+            events={data.events}
           />
         </div>
         <div className="sidebar-panel" style={{ margin: '0 12px 12px' }}>

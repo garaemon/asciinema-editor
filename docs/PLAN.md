@@ -92,7 +92,7 @@ Asciicast v2 uses NDJSON (Newline Delimited JSON) format:
 - Play / pause / stop controls
 - Seekbar with timeline navigation
 - Playback speed preview (0.25x - 4x)
-- Frame-by-frame stepping (previous/next event)
+- Frame-by-frame stepping (previous/next event) (DONE)
 
 #### 4.3 Speed Adjustment
 - Global speed multiplier for entire recording
@@ -424,3 +424,10 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - Auto-detect v2 vs v3 from header
 - Convert v3 relative times to absolute times internally for unified editing
 - Update serializer to export as v3 when source was v3
+
+### Phase H: UX Enhancements
+
+### PR 23: Frame-by-Frame Stepping (DONE)
+- `src/lib/event-navigation.ts` - `findPreviousEvent` / `findNextEvent` lookup helpers (TDD, 12 tests)
+- Timeline component: add previous/next event buttons flanking the play button
+- Buttons seek to the neighboring event timestamp, pause playback, and disable at list boundaries

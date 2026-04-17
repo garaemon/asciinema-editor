@@ -203,6 +203,30 @@ body {
   background: #3a3a5a;
 }
 
+.timeline-step-button {
+  width: 32px;
+  height: 32px;
+  background: #2a2a4a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.timeline-step-button:hover:not(:disabled) {
+  background: #3a3a5a;
+}
+
+.timeline-step-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .timeline-time {
   font-size: 12px;
   color: #aaa;

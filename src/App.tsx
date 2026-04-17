@@ -1,5 +1,6 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useHistory } from './hooks/useHistory'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { FileUpload } from './components/FileUpload'
 import { Player } from './components/Player'
 import { Timeline } from './components/Timeline'
@@ -29,6 +30,9 @@ interface EditingScreenProps {
   hasChanges: boolean;
   fontConfig: FontConfig;
   onFontConfigChange: (config: FontConfig) => void;
+  onPlayerReady: (player: AsciinemaPlayerType) => void;
+  onPlayerDispose: () => void;
+  playerInstance: AsciinemaPlayerType | null;
 }
 
 /** Compute total duration from the last event's timestamp. Single source of truth — used by both EditingScreen and ExportPanel. */
@@ -39,17 +43,7 @@ function computeTotalDuration(data: AsciicastData): number {
   return data.events[data.events.length - 1][0];
 }
 
-function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges, fontConfig, onFontConfigChange }: EditingScreenProps) {
-  const [playerInstance, setPlayerInstance] = useState<AsciinemaPlayerType | null>(null);
-
-  const handlePlayerReady = useCallback((player: AsciinemaPlayerType) => {
-    setPlayerInstance(player);
-  }, []);
-
-  const handlePlayerDispose = useCallback(() => {
-    setPlayerInstance(null);
-  }, []);
-
+function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges, fontConfig, onFontConfigChange, onPlayerReady, onPlayerDispose, playerInstance }: EditingScreenProps) {
   return (
     <div className="editing-screen">
       <aside className="sidebar">
@@ -81,8 +75,8 @@ function EditingScreen({ data, castContent, onDataChange, onReset, hasChanges, f
             width={data.header.width}
             height={data.header.height}
             fontConfig={fontConfig}
-            onPlayerReady={handlePlayerReady}
-            onPlayerDispose={handlePlayerDispose}
+            onPlayerReady={onPlayerReady}
+            onPlayerDispose={onPlayerDispose}
           />
         </div>
         <div className="timeline-area">
@@ -118,6 +112,47 @@ function App() {
   } = useHistory<AppState | null>(null);
   // Stores the original data at file load time so trim operations can be reverted
   const [originalData, setOriginalData] = useState<AsciicastData | null>(null)
+  const [playerInstance, setPlayerInstance] = useState<AsciinemaPlayerType | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  const handlePlayerReady = useCallback((player: AsciinemaPlayerType) => {
+    setPlayerInstance(player)
+  }, [])
+
+  const handlePlayerDispose = useCallback(() => {
+    setPlayerInstance(null)
+    setIsPlaying(false)
+  }, [])
+
+  // Track the player's play/pause state so keyboard shortcuts can toggle correctly
+  useEffect(() => {
+    if (!playerInstance) {
+      return
+    }
+    const handlePlay = () => setIsPlaying(true)
+    const handlePause = () => setIsPlaying(false)
+    const handleEnded = () => setIsPlaying(false)
+    playerInstance.addEventListener('play', handlePlay)
+    playerInstance.addEventListener('pause', handlePause)
+    playerInstance.addEventListener('ended', handleEnded)
+  }, [playerInstance])
+
+  const handleTogglePlayPause = useCallback(() => {
+    if (!playerInstance) {
+      return
+    }
+    if (isPlaying) {
+      playerInstance.pause()
+    } else {
+      playerInstance.play()
+    }
+  }, [playerInstance, isPlaying])
+
+  useKeyboardShortcuts({
+    onPlayPause: handleTogglePlayPause,
+    onUndo: undoHistory,
+    onRedo: redoHistory,
+  })
 
   const asciicastData = appState?.data ?? null;
   const fontConfig = appState?.fontConfig ?? DEFAULT_FONT_CONFIG;
@@ -195,6 +230,9 @@ function App() {
             hasChanges={appState?.data !== originalData}
             fontConfig={fontConfig}
             onFontConfigChange={handleFontConfigChange}
+            onPlayerReady={handlePlayerReady}
+            onPlayerDispose={handlePlayerDispose}
+            playerInstance={playerInstance}
           />
         )}
         {screen === 'export' && asciicastData && (

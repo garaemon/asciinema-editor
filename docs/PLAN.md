@@ -144,7 +144,7 @@ Asciicast v2 uses NDJSON (Newline Delimited JSON) format:
 - Before/After diff preview
 
 #### 4.14 UX Improvements
-- Keyboard shortcuts (Space for play/pause, Ctrl+Z/Y for undo/redo)
+- Keyboard shortcuts (Space for play/pause, Ctrl+Z/Y for undo/redo) (DONE)
 - Auto-save to browser storage
 
 ### P2 - Future Extensions
@@ -424,3 +424,10 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - Auto-detect v2 vs v3 from header
 - Convert v3 relative times to absolute times internally for unified editing
 - Update serializer to export as v3 when source was v3
+
+### Phase H: UX Enhancements
+
+### PR 23: Keyboard Shortcuts (DONE)
+- `src/hooks/useKeyboardShortcuts.ts` - document-level keydown listener with TDD
+- Space toggles play/pause, Ctrl/Cmd+Z undoes, Ctrl/Cmd+Shift+Z and Ctrl+Y redo
+- Shortcuts are suppressed while focus is inside input/textarea/contentEditable

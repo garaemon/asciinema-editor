@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { Player } from "asciinema-player";
+import type { AsciicastEvent } from "../types/asciicast";
+import { findPreviousEvent, findNextEvent } from "../lib/event-navigation";
 
 interface TimelineProps {
   player: Player | null;
   totalDuration: number;
+  events?: AsciicastEvent[];
 }
 
 function formatTime(seconds: number): string {
@@ -12,7 +15,7 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
-export function Timeline({ player, totalDuration }: TimelineProps) {
+export function Timeline({ player, totalDuration, events = [] }: TimelineProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const isSeekingRef = useRef(false);
@@ -75,6 +78,27 @@ export function Timeline({ player, totalDuration }: TimelineProps) {
     }
   }, [player, isPlaying]);
 
+  const seekToEvent = useCallback(
+    async (event: AsciicastEvent | null) => {
+      if (!player || !event) {
+        return;
+      }
+      await player.pause();
+      await player.seek(event[0]);
+      setCurrentTime(event[0]);
+      setIsPlaying(false);
+    },
+    [player],
+  );
+
+  const handleStepPrevious = useCallback(() => {
+    seekToEvent(findPreviousEvent(events, currentTime));
+  }, [events, currentTime, seekToEvent]);
+
+  const handleStepNext = useCallback(() => {
+    seekToEvent(findNextEvent(events, currentTime));
+  }, [events, currentTime, seekToEvent]);
+
   const computeTimeFromEvent = useCallback(
     (clientX: number): number => {
       if (!trackRef.current) {
@@ -128,14 +152,33 @@ export function Timeline({ player, totalDuration }: TimelineProps) {
     );
   }
 
+  const hasPreviousEvent = findPreviousEvent(events, currentTime) !== null;
+  const hasNextEvent = findNextEvent(events, currentTime) !== null;
+
   return (
     <div className="timeline" data-testid="timeline">
+      <button
+        className="timeline-step-button"
+        onClick={handleStepPrevious}
+        disabled={!hasPreviousEvent}
+        aria-label="Previous event"
+      >
+        {"\u23EA"}
+      </button>
       <button
         className="timeline-play-button"
         onClick={handleTogglePlay}
         aria-label={isPlaying ? "Pause" : "Play"}
       >
         {isPlaying ? "\u275A\u275A" : "\u25B6"}
+      </button>
+      <button
+        className="timeline-step-button"
+        onClick={handleStepNext}
+        disabled={!hasNextEvent}
+        aria-label="Next event"
+      >
+        {"\u23E9"}
       </button>
       <span className="timeline-time">{formatTime(currentTime)}</span>
       <div

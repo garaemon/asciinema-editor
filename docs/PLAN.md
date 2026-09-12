@@ -98,7 +98,7 @@ Asciicast v2 uses NDJSON (Newline Delimited JSON) format:
 - Global speed multiplier for entire recording
 - Automatic idle time compression (e.g., "compress pauses > 2s to 0.5s")
 
-#### 4.4 Annotations
+#### 4.4 Annotations (see Phase J)
 - Text annotations at specified timestamps
 - Frame freeze: pause GIF/MP4 at a specified point for N seconds
 
@@ -129,7 +129,7 @@ Asciicast v2 uses NDJSON (Newline Delimited JSON) format:
 - Per-segment speed adjustment (select time range, apply different speed)
 - Typing speed normalization (uniform interval between keystrokes)
 
-#### 4.11 Advanced Annotations
+#### 4.11 Advanced Annotations (see Phase J)
 - Rectangular highlight overlay on specific terminal regions
 - Step number markers ("Step 1", "Step 2")
 
@@ -338,7 +338,7 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - Wire serializer to generate .cast file and trigger browser download
 - Minimal viable export: .cast only (GIF/MP4 deferred)
 
-### Phase C: Editing Features, Font & Export Foundation
+### Phase C: Editing Features, Font & Export Foundation - DONE
 
 ### PR 14: Undo/Redo (DONE)
 - `src/hooks/useHistory.ts` - Generic history hook with past/present/future stack
@@ -417,9 +417,9 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - The `width` option already exists in both exporters but is not exposed in the UI
 - Slider or preset selector (e.g., 480p, 720p, 1080p)
 
-### Phase G: Format Support
+### Phase G: Format Support - DONE
 
-### PR 21: Asciicast v3 Support
+### PR 21: Asciicast v3 Support (DONE, delivered by PR 9)
 - Update parser to handle v3 format (relative timestamps, comment lines with `#`, tags)
 - Auto-detect v2 vs v3 from header
 - Convert v3 relative times to absolute times internally for unified editing
@@ -435,10 +435,78 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 - Edge cases covered: empty range, full-range cut, empty events, invalid input
 - UI wiring deferred to a follow-up PR
 
-### Phase I: UX Enhancements
+### Phase I: UX Enhancements - DONE
 
 ### PR 24: Frame-by-Frame Stepping (DONE)
 - `src/lib/event-navigation.ts` - `findPreviousEvent` / `findNextEvent` lookup helpers (TDD, 12 tests)
 - Timeline component: add previous/next event buttons flanking the play button
 - Buttons seek to the neighboring event timestamp, pause playback, and disable at list boundaries
 
+### Phase J: Video-Style Annotations
+
+Goal: use the editor like a lightweight video editor to explain software
+behavior. Annotations (callouts, highlight boxes, captions, step badges) and
+holds (freeze the frame for N seconds) appear in the preview, on the timeline,
+and are baked into exported GIF/MP4.
+
+Design notes:
+- Annotations live in `AnnotationTrack { annotations, holds }` inside the
+  undoable app state, separate from `AsciicastData`, so editing them never
+  rebuilds the player.
+- Annotation `start`/`end` are output-timeline seconds; holds are anchored at a
+  source-timeline second. `time-map` converts between the two.
+- The overlay is rendered as DOM inside the element captured by html-to-image,
+  so export picks it up without extra rendering code.
+
+### PR 25: Annotation Types + Core Library (TDD) (DONE)
+- `src/types/annotation.ts` - `Annotation` union (callout, highlight, caption, step), `Hold`, `AnnotationTrack`
+- `src/lib/annotations.ts` - `addAnnotation`, `updateAnnotation`, `removeAnnotation`, `visibleAnnotations`, `sortByStart`, `stepIndex`
+- `src/lib/__tests__/annotations.test.ts` - 14 TDD tests
+
+### PR 26: Overlay Geometry + AnnotationOverlay Component
+- `src/lib/overlay-geometry.ts` - cell/region/anchor to percent conversion
+- `src/components/AnnotationOverlay.tsx` - absolutely positioned overlay, one element per visible annotation
+
+### PR 27: Wire Overlay into the Editing Preview
+- `AppState` gains `track`; `Timeline` gains `onTimeChange`
+- Overlay rendered over the player; temporary "Add callout at current time" button
+
+### PR 28: Bake Overlay into GIF/MP4
+- `onFrame(outputTime)` option in both exporters; ExportPanel renders the overlay inside the captured element
+
+### PR 29: Time Map + Holds Library (TDD)
+- `src/lib/time-map.ts` - `computeOutputDuration`, `sourceToOutputTime`, `outputToSourceTime`, `findHoldAt`, `holdOutputRange`
+- `src/lib/holds.ts` - `addHold`, `updateHold`, `removeHold`
+
+### PR 30: Frame Sequence over the Output Timeline
+- `src/lib/frame-sequence.ts` - `buildFrameSequence`, `iterateFrames` shared by both exporters; holds baked into export
+
+### PR 31: Timeline in Output Time + Lane Slot
+- Seekbar shows output duration; seeks map back to source time; `lane` render slot under the track
+
+### PR 32: AnnotationLane Skeleton
+- Bars per annotation, hold marks, click selection, keyboard delete
+
+### PR 33: Lane Drag Move / Resize
+- `moveAnnotation`, `resizeAnnotation` in `annotations.ts`; drag handles on lane bars
+
+### PR 34: AnnotationControls Panel
+- Replace the sidebar placeholder: add buttons per kind, add hold, list, delete; `defaultAnnotation` factory
+
+### PR 35: AnnotationForm
+- Kind-specific edit fields for the selected annotation or hold
+
+### PR 36: Accurate Terminal Geometry
+- `measureTerminalRect` reading the player's terminal element; `useTerminalRect` hook with ResizeObserver
+
+### PR 37: Hold-Aware Preview Playback
+- `usePlaybackTime` hook pauses the player during holds and advances output time
+
+### PR 38: Project File Save / Load
+- `src/lib/project.ts` - JSON project format with validation; FileUpload accepts `.json`
+
+### PR 39: Marker Emission in .cast Export
+- `src/lib/markers.ts` - emit `"m"` events at step/callout starts (opt-in checkbox)
+
+### PR 40 (optional): Hold Ripple
+- Shift annotations when holds are inserted or removed before them

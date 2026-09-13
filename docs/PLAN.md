@@ -463,9 +463,10 @@ Design notes:
 - `src/lib/annotations.ts` - `addAnnotation`, `updateAnnotation`, `removeAnnotation`, `visibleAnnotations`, `sortByStart`, `stepIndex`
 - `src/lib/__tests__/annotations.test.ts` - 14 TDD tests
 
-### PR 26: Overlay Geometry + AnnotationOverlay Component
-- `src/lib/overlay-geometry.ts` - cell/region/anchor to percent conversion
-- `src/components/AnnotationOverlay.tsx` - absolutely positioned overlay, one element per visible annotation
+### PR 26: Overlay Geometry + AnnotationOverlay Component (DONE)
+- `src/lib/overlay-geometry.ts` - cell/region/anchor to percent conversion (9 TDD tests)
+- `src/components/AnnotationOverlay.tsx` - absolutely positioned overlay, one element per visible annotation (6 RTL tests)
+- Overlay CSS in `src/App.css`; not yet mounted in the app (PR 27)
 
 ### PR 27: Wire Overlay into the Editing Preview
 - `AppState` gains `track`; `Timeline` gains `onTimeChange`
@@ -497,7 +498,7 @@ Design notes:
 - Kind-specific edit fields for the selected annotation or hold
 
 ### PR 36: Accurate Terminal Geometry
-- `measureTerminalRect` reading the player's terminal element; `useTerminalRect` hook with ResizeObserver
+- `measureTerminalRect` reading the player's `.ap-term` element (asciinema-player v3 DOM: `.ap-wrapper > .ap-player > .ap-term`); `useTerminalRect` hook with ResizeObserver
 
 ### PR 37: Hold-Aware Preview Playback
 - `usePlaybackTime` hook pauses the player during holds and advances output time

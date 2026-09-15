@@ -410,6 +410,9 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 ### DevSecOps Pipeline (DONE)
 - Dependabot, Gitleaks, CodeQL, supply chain hardening
 
+### Security Audit Fix (DONE)
+- Refresh transitive dependencies to clear `npm audit --audit-level=high` failures
+
 ### Phase F: Export Enhancements - DONE
 
 ### PR 22: Configurable Export Resolution (DONE)

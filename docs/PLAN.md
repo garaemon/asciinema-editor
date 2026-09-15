@@ -416,6 +416,9 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 ### React 19.3 Upgrade (DONE)
 - Bump `react` and `react-dom` together, because React rejects mismatched versions
 
+### Vite 8 Upgrade (DONE)
+- Bump `vite` and `@vitejs/plugin-react` together, because plugin-react 6 requires vite 8
+
 ### Phase F: Export Enhancements - DONE
 
 ### PR 22: Configurable Export Resolution (DONE)

@@ -413,6 +413,9 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 ### Security Audit Fix (DONE)
 - Refresh transitive dependencies to clear `npm audit --audit-level=high` failures
 
+### React 19.3 Upgrade (DONE)
+- Bump `react` and `react-dom` together, because React rejects mismatched versions
+
 ### Phase F: Export Enhancements - DONE
 
 ### PR 22: Configurable Export Resolution (DONE)

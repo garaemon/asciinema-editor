@@ -419,6 +419,9 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 ### Vite 8 Upgrade (DONE)
 - Bump `vite` and `@vitejs/plugin-react` together, because plugin-react 6 requires vite 8
 
+### CodeQL Action v4.38 Upgrade (DONE)
+- Bump `github/codeql-action` manually, because Dependabot closed #104 by mistake
+
 ### Phase F: Export Enhancements - DONE
 
 ### PR 22: Configurable Export Resolution (DONE)

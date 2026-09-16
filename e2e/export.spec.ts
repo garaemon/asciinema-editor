@@ -57,7 +57,7 @@ test.describe("Export Screen", () => {
   test("frame count updates when FPS slider changes", async ({ page }) => {
     await navigateToExportScreen(page);
 
-    const fpsSlider = page.getByRole("slider", { name: /FPS/ });
+    const fpsSlider = page.getByRole("slider", { name: "GIF FPS" });
     await fpsSlider.fill("5");
 
     // 2s * 5fps = ~10 frames

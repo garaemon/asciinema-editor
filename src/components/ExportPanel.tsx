@@ -101,6 +101,7 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
             onChange={(e) => setMp4Fps(Number(e.target.value))}
             disabled={isExporting}
             style={{ flex: 1 }}
+            aria-label="MP4 FPS"
           />
         </label>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -156,6 +157,7 @@ export function ExportPanel({ data, castContent, fontConfig, duration }: ExportP
               onChange={(e) => setGifFps(Number(e.target.value))}
               disabled={isExporting}
               style={{ flex: 1 }}
+              aria-label="GIF FPS"
             />
           </label>
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

@@ -45,6 +45,12 @@ describe("ExportPanel", () => {
     expect(screen.getByLabelText(/MP4 Width/i)).toBeInTheDocument();
   });
 
+  it("distinguishes the GIF and MP4 FPS sliders by label", () => {
+    render(<ExportPanel {...DEFAULT_PROPS} />);
+    expect(screen.getByLabelText(/GIF FPS/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/MP4 FPS/i)).toBeInTheDocument();
+  });
+
   it("shows default GIF width value", () => {
     render(<ExportPanel {...DEFAULT_PROPS} />);
     const slider = screen.getByLabelText(/GIF Width/i) as HTMLInputElement;

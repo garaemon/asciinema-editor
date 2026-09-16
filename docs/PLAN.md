@@ -422,6 +422,9 @@ Library code uses TDD (tests first). UI code uses top-down approach (skeleton fi
 ### CodeQL Action v4.38 Upgrade (DONE)
 - Bump `github/codeql-action` manually, because Dependabot closed #104 by mistake
 
+### E2E Selector Fix (DONE)
+- Label the GIF and MP4 FPS sliders apart, and match the Apply button exactly
+
 ### Phase F: Export Enhancements - DONE
 
 ### PR 22: Configurable Export Resolution (DONE)

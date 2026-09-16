@@ -57,7 +57,7 @@ test.describe("Export Screen", () => {
   test("frame count updates when FPS slider changes", async ({ page }) => {
     await navigateToExportScreen(page);
 
-    const fpsSlider = page.getByRole("slider", { name: /FPS/ });
+    const fpsSlider = page.getByRole("slider", { name: "GIF FPS" });
     await fpsSlider.fill("5");
 
     // 2s * 5fps = ~10 frames
@@ -69,7 +69,7 @@ test.describe("Export Screen", () => {
 
     // Apply 2x speed on editing screen
     await page.getByRole("spinbutton", { name: "Speed multiplier" }).fill("2");
-    await page.getByRole("button", { name: "Apply" }).click();
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
 
     // Navigate to export
     await page.getByRole("button", { name: "Export" }).click();
@@ -113,7 +113,7 @@ test.describe("Export Screen", () => {
 
     // Apply 2x speed
     await page.getByRole("spinbutton", { name: "Speed multiplier" }).fill("2");
-    await page.getByRole("button", { name: "Apply" }).click();
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
 
     // Change font
     await page.getByRole("combobox").selectOption("Fira Code");

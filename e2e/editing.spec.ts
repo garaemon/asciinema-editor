@@ -26,7 +26,7 @@ test.describe("Speed Controls", () => {
     // Apply 2x speed - timestamps should be halved
     const speedInput = page.locator("#speed-multiplier");
     await speedInput.fill("2");
-    await page.getByRole("button", { name: "Apply" }).click();
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
 
     // The max duration in the trim-end label should decrease
     const newLabel = await trimEndLabel.textContent();

@@ -21,7 +21,7 @@ test.describe("Undo/Redo", () => {
     // Apply speed change to create an undo entry
     const speedInput = page.locator("#speed-multiplier");
     await speedInput.fill("2");
-    await page.getByRole("button", { name: "Apply" }).click();
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
 
     const undoButton = page.getByRole("button", { name: "Undo" });
 
@@ -101,7 +101,7 @@ test.describe("Undo/Redo", () => {
 
     // Change multiplier and apply
     await speedInput.fill("3");
-    await page.getByRole("button", { name: "Apply" }).click();
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
 
     // Speed input should keep the user's value after applying
     await expect(speedInput).toHaveValue("3");
@@ -114,7 +114,7 @@ test.describe("Undo/Redo", () => {
 
     // Change multiplier and apply
     await speedInput.fill("3");
-    await page.getByRole("button", { name: "Apply" }).click();
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
 
     // Value should persist after apply
     await expect(speedInput).toHaveValue("3");
